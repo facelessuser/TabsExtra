@@ -238,5 +238,13 @@ def plugin_loaded():
         with open(menu, "w") as f:
             f.write(DEFAULT_MENU)
 
+
+def St2Warn():
+    warn = '''TabsExtra:\nST2 support is not officially complete.  For best functionality, it is recommended to install the override menu for the Default tab context menu.'''
+    sublime.error_message(warn)
+
+
 if not ST3:
+    if sublime.load_settings("tabs_extra.sublime-settings").get("st2_warning_enabled", True):
+        sublime.set_timeout(St2Warn, 3000)
     plugin_loaded()

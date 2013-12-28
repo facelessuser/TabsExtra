@@ -1,4 +1,5 @@
 {
     "persistent_sticky": false,
-    "all_commands_respect_sticky": false
+    "all_commands_respect_sticky": false,
+    "st2_warning_enabled": true
 }

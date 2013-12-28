@@ -30,3 +30,5 @@ By default, the commands won't be grouped together because of the way Sublime Te
 
 # ST2 Support?
 ST2 support is not officially complete.  For best functionality, it is recommended to install the override menu for the Default tab context menu.
+
+Sublime Text 2 will pop up a warning reminding you that ST2 support is not final.  You can disable it in the settings file.
