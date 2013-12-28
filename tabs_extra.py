@@ -20,9 +20,7 @@ DEFAULT_MENU = '''[
     { "command": "tabs_extra_clear_all_sticky", "args": { "group": -1, "force": true }, "caption": "Clear All Sticky Tabs" },
     { "caption": "-", "id": "tabs_extra" },
     { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "all"}, "caption": "Close All Tabs" },
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "left" }, "caption": "Close Tabs to the Left" },
-    { "command": "tabs_extra_close_sticky", "args": { "group": -1, "index": -1 }, "caption": "Close Sticky Tabs" },
-    { "command": "tabs_extra_close_sticky", "args": { "group": -1, "index": -1, "invert": true }, "caption": "Close Non-Sticky Tabs" }
+    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "left" }, "caption": "Close Tabs to the Left" }
 ]
 '''
 
@@ -34,8 +32,6 @@ OVERRIDE_MENU = '''
     { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "other" }, "caption": "Close Other Tabs" },
     { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "right" }, "caption": "Close Tabs to the Right" },
     { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "left" }, "caption": "Close Tabs to the Left" },
-    { "command": "tabs_extra_close_sticky", "args": { "group": -1, "index": -1 }, "caption": "Close Sticky Tabs" },
-    { "command": "tabs_extra_close_sticky", "args": { "group": -1, "index": -1, "invert": true }, "caption": "Close Non-Sticky Tabs" },
     { "caption": "-" },
     { "command": "tabs_extra_toggle_sticky", "args": { "group": -1, "index": -1 }, "caption": "Sticky Tab" },
     { "command": "tabs_extra_clear_all_sticky", "args": { "group": -1, "force": true }, "caption": "Clear All Sticky Tabs" },
@@ -92,10 +88,6 @@ def is_persistent():
     return sublime.load_settings(SETTINGS).get("persistent_sticky", False)
 
 
-def respect_sticky():
-    return sublime.load_settings(SETTINGS).get("all_commands_respect_sticky", False)
-
-
 class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
     def run(self, group=-1, force=False):
         if group == -1:
@@ -132,36 +124,9 @@ class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
         return self.window.views_in_group(int(group))[index].settings().get("tabs_extra_sticky", False)
 
 
-class TabsExtraCloseStickyCommand(sublime_plugin.WindowCommand):
-    def run(self, group=-1, index=-1, invert=False):
-        if group == -1 or index == -1:
-            return
-        persistent = is_persistent()
-        views = self.window.views_in_group(int(group))
-        for v in views:
-            sticky = v.settings().get("tabs_extra_sticky", False)
-            if (not invert and sticky) or (invert and not sticky):
-                if not persistent:
-                    v.settings().erase("tabs_extra_sticky")
-                self.window.focus_view(v)
-                self.window.run_command("close_file")
-            elif not persistent:
-                v.settings().erase("tabs_extra_sticky")
-
-    def is_visible(self, group=-1, index=-1, invert=False):
-        marked = False
-        views = self.window.views_in_group(int(group))
-        for v in views:
-            if v.settings().get("tabs_extra_sticky", False):
-                marked = True
-                break
-        return marked
-
-
 class TabsExtraCommand(sublime_plugin.WindowCommand):
     def init(self, close_type, group, index):
         self.persistent = is_persistent()
-        self.check_sticky = respect_sticky()
         views = self.window.views_in_group(int(group))
         assert(close_type in ["single", "left", "right", "other", "all"])
 
@@ -187,7 +152,7 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
         self.init(close_type, group, index)
 
         for v in self.targets:
-            if not self.check_sticky or (self.check_sticky and not v.settings().get("tabs_extra_sticky", False)):
+            if not v.settings().get("tabs_extra_sticky", False):
                 if not self.persistent:
                     v.settings().erase("tabs_extra_sticky")
                 self.window.focus_view(v)
