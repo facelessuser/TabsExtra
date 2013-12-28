@@ -8,6 +8,7 @@ ST3 = int(sublime.version()) >= 3000
 PACKAGE_NAME = "TabsExtra"
 DEFAULT_PACKAGE = "Default"
 TAB_MENU = "Tab Context.sublime-menu"
+SETTINGS = "tabs_extra.sublime-settings"
 
 EMPTY_MENU = '''[
 ]
@@ -44,20 +45,6 @@ OVERRIDE_MENU = '''
 ]
 '''
 
-OVERRIDE_CONFIRM = '''TabsExtra will overwrite the entire "Tab Context.sublime-menu" file in "Packages/Default" with a new one.  ST3 keeps an unmodified copy in the archive, but in ST2 TabsExtra will backup the current menu.  In ST2, updates may wipe out the override menu and may require you to re-install the override menu.
-
-You do this at your own risk.  If something goes wrong, you may need to manually fix the menu.
-
-Are you sure you want to continue?
-'''
-
-RESTORE_CONFIRM = '''In ST3 TabsExtra will simply delete the override "Tab Context.sublime-menu" from "Packages/Default" to allow the archived menu to take effect.  In ST2, TabsExtra will try to restore the menu from the previous backup; if the restore fails, TabsExtra will generate a new one which should match the shipped version.
-
-You do this at your own risk.  If something goes wrong, you may need to manually fix the menu.
-
-Are you sure you want to continue?
-'''
-
 BACKUP_MENU = '''[
     { "command": "close_by_index", "args": { "group": -1, "index": -1 }, "caption": "Close" },
     { "command": "close_others_by_index", "args": { "group": -1, "index": -1 }, "caption": "Close others" },
@@ -68,13 +55,45 @@ BACKUP_MENU = '''[
 ]
 '''
 
+OVERRIDE_CONFIRM = '''TabsExtra will overwrite the entire "Tab Context.sublime-menu" file in "Packages/Default" with a new one.  ST3 keeps an unmodified copy in the archive.
+
+You do this at your own risk.  If something goes wrong, you may need to manually fix the menu.
+
+Are you sure you want to continue?
+'''
+
+OVERRIDE_CONFIRM2 = '''TabsExtra will overwrite the entire "Tab Context.sublime-menu" file in "Packages/Default" with a new one.  In ST2, TabsExtra will backup the current menu, but updates may wipe out the override menu and may require you to re-install the override menu.
+
+You do this at your own risk.  If something goes wrong, you may need to manually fix the menu.
+
+Are you sure you want to continue?
+'''
+
+RESTORE_CONFIRM = '''In ST3 TabsExtra will simply delete the override "Tab Context.sublime-menu" from "Packages/Default" to allow the archived menu to take effect.
+
+You do this at your own risk.  If something goes wrong, you may need to manually fix the menu.
+
+Are you sure you want to continue?
+'''
+
+RESTORE_CONFIRM2 = '''In ST2, TabsExtra will try to restore the "Tab Context.sublime-menu" menu from a previous backup.  If the restore fails, TabsExtra will generate a new one which should match the shipped version.
+
+You do this at your own risk.  If something goes wrong, you may need to manually fix the menu.
+
+Are you sure you want to continue?
+'''
+
+ST2_WARN_MSG = '''TabsExtra:
+ST2 support is not officially complete.  For best functionality, it is recommended to install the override menu for the Default tab context menu.
+'''
+
 
 def is_persistent():
-    return sublime.load_settings("tabs_extra.sublime-settings").get("persistent_sticky", False)
+    return sublime.load_settings(SETTINGS).get("persistent_sticky", False)
 
 
 def respect_sticky():
-    return sublime.load_settings("tabs_extra.sublime-settings").get("all_commands_respect_sticky", False)
+    return sublime.load_settings(SETTINGS).get("all_commands_respect_sticky", False)
 
 
 class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
@@ -199,7 +218,8 @@ class TabsExtraListener(sublime_plugin.EventListener):
 
 class TabsExtraInstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
     def run(self):
-        if sublime.ok_cancel_dialog(OVERRIDE_CONFIRM):
+        msg = OVERRIDE_CONFIRM if ST3 else OVERRIDE_CONFIRM2
+        if sublime.ok_cancel_dialog(msg):
             menu_path = join(sublime.packages_path(), "User", PACKAGE_NAME)
             if not exists(menu_path):
                 makedirs(menu_path)
@@ -219,7 +239,8 @@ class TabsExtraInstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
 
 class TabsExtraUninstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
     def run(self):
-        if sublime.ok_cancel_dialog(RESTORE_CONFIRM):
+        msg = RESTORE_CONFIRM if ST3 else RESTORE_CONFIRM2
+        if sublime.ok_cancel_dialog(msg):
             menu_path = join(sublime.packages_path(), "User", PACKAGE_NAME)
             if not exists(menu_path):
                 makedirs(menu_path)
@@ -249,11 +270,10 @@ def plugin_loaded():
 
 
 def St2Warn():
-    warn = '''TabsExtra:\nST2 support is not officially complete.  For best functionality, it is recommended to install the override menu for the Default tab context menu.'''
-    sublime.error_message(warn)
+    sublime.error_message(ST2_WARN_MSG)
 
 
 if not ST3:
-    if sublime.load_settings("tabs_extra.sublime-settings").get("st2_warning_enabled", True):
+    if sublime.load_settings(SETTINGS).get("st2_warning_enabled", True):
         sublime.set_timeout(St2Warn, 3000)
     plugin_loaded()
