@@ -1,5 +1,14 @@
 {
+    // Ensures that all commands will respect the "sticky"
+    // setting and not close "sticky" tabs
+    "all_commands_respect_sticky": true,
+
+    // By default TabsExtra forgets a tab's "stickiness" when
+    // any "tab close" command is issued.  You can make the tab's
+    // "Stickiness" persist by enabling the following feature.
     "persistent_sticky": false,
-    "all_commands_respect_sticky": false,
+
+    // Nagging people that ST2 support is not done, or will not formally
+    // be supported.  The nag dialog can be disabled here.
     "st2_warning_enabled": true
 }

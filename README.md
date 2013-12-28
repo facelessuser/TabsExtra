@@ -13,13 +13,13 @@ Sublime Plugin with sticky tabs and more tab closing options.  ST3 is the only *
 - Overrides the built-in tab commands to work with sticky tabs (ST3 only)
 
 # Sticky Tab Settings
-You can make non `Sticky` commands not close `Sticky` tabs by enabling the following setting:
+By default, all commands will ignore closing a sticky command.  You can make non `Sticky` commands close `Sticky` tabs by disabling the following setting:
 
 ```javascript
-    "all_commands_respect_sticky": false
+    "all_commands_respect_sticky": true
 ```
 
-By default, after any `Close` command is run, all `Sticky` tab properties are removed.  You can make a tab's `Stickiness` persist by enabling the following setting:
+By default, after any `Close` command is run, all `Sticky` tab properties are forgotten.  You can make a tab's `Stickiness` persist by enabling the following setting:
 
 ```javascript
     "persistent_sticky": false,
