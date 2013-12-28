@@ -82,14 +82,14 @@ class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
         if group == -1:
             return
         persistent = is_persistent()
-        views = self.window.views_in_group(group)
+        views = self.window.views_in_group(int(group))
         if not persistent or force:
             for v in views:
                 v.settings().erase("tabs_extra_sticky")
 
     def is_visible(self, group=-1, force=False):
         marked = False
-        views = self.window.views_in_group(group)
+        views = self.window.views_in_group(int(group))
         for v in views:
             if v.settings().get("tabs_extra_sticky", False):
                 marked = True
@@ -101,7 +101,7 @@ class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
     def run(self, group=-1, index=-1):
         if group == -1 or index == -1:
             return False
-        view = self.window.views_in_group(group)[index]
+        view = self.window.views_in_group(int(group))[index]
         if not view.settings().get("tabs_extra_sticky", False):
             view.settings().set("tabs_extra_sticky", True)
         else:
@@ -110,7 +110,7 @@ class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
     def is_checked(self, group=-1, index=-1):
         if group == -1 or index == -1:
             return False
-        return self.window.views_in_group(group)[index].settings().get("tabs_extra_sticky", False)
+        return self.window.views_in_group(int(group))[index].settings().get("tabs_extra_sticky", False)
 
 
 class TabsExtraCloseStickyCommand(sublime_plugin.WindowCommand):
@@ -118,7 +118,7 @@ class TabsExtraCloseStickyCommand(sublime_plugin.WindowCommand):
         if group == -1 or index == -1:
             return
         persistent = is_persistent()
-        views = self.window.views_in_group(group)
+        views = self.window.views_in_group(int(group))
         for v in views:
             sticky = v.settings().get("tabs_extra_sticky", False)
             if (not invert and sticky) or (invert and not sticky):
@@ -131,7 +131,7 @@ class TabsExtraCloseStickyCommand(sublime_plugin.WindowCommand):
 
     def is_visible(self, group=-1, index=-1, invert=False):
         marked = False
-        views = self.window.views_in_group(group)
+        views = self.window.views_in_group(int(group))
         for v in views:
             if v.settings().get("tabs_extra_sticky", False):
                 marked = True
@@ -143,7 +143,7 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
     def init(self, close_type, group, index):
         self.persistent = is_persistent()
         self.check_sticky = respect_sticky()
-        views = self.window.views_in_group(group)
+        views = self.window.views_in_group(int(group))
         assert(close_type in ["single", "left", "right", "other", "all"])
 
         if close_type == "single":
