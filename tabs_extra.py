@@ -90,13 +90,12 @@ def is_persistent():
 
 class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
     def run(self, group=-1, force=False):
-        if group == -1:
-            return
-        persistent = is_persistent()
-        views = self.window.views_in_group(int(group))
-        if not persistent or force:
-            for v in views:
-                v.settings().erase("tabs_extra_sticky")
+        if group >= 0:
+            persistent = is_persistent()
+            views = self.window.views_in_group(int(group))
+            if not persistent or force:
+                for v in views:
+                    v.settings().erase("tabs_extra_sticky")
 
     def is_visible(self, group=-1, force=False):
         marked = False
@@ -110,18 +109,18 @@ class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
 
 class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
     def run(self, group=-1, index=-1):
-        if group == -1 or index == -1:
-            return False
-        view = self.window.views_in_group(int(group))[index]
-        if not view.settings().get("tabs_extra_sticky", False):
-            view.settings().set("tabs_extra_sticky", True)
-        else:
-            view.settings().erase("tabs_extra_sticky")
+        if group >= 0 or index >= 0:
+            view = self.window.views_in_group(int(group))[index]
+            if not view.settings().get("tabs_extra_sticky", False):
+                view.settings().set("tabs_extra_sticky", True)
+            else:
+                view.settings().erase("tabs_extra_sticky")
 
     def is_checked(self, group=-1, index=-1):
-        if group == -1 or index == -1:
-            return False
-        return self.window.views_in_group(int(group))[index].settings().get("tabs_extra_sticky", False)
+        checked = False
+        if group >= 0 or index >= 0:
+            checked = self.window.views_in_group(int(group))[index].settings().get("tabs_extra_sticky", False)
+        return checked
 
 
 class TabsExtraCommand(sublime_plugin.WindowCommand):
@@ -147,38 +146,38 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
             self.cleanup = False
 
     def run(self, group=-1, index=-1, close_type="single"):
-        if group == -1 or index == -1:
-            return
-        self.init(close_type, group, index)
+        if group >= 0 or index >= 0:
+            self.init(close_type, group, index)
 
-        for v in self.targets:
-            if not v.settings().get("tabs_extra_sticky", False):
-                if not self.persistent:
+            for v in self.targets:
+                if not v.settings().get("tabs_extra_sticky", False):
+                    if not self.persistent:
+                        v.settings().erase("tabs_extra_sticky")
+                    self.window.focus_view(v)
+                    self.window.run_command("close_file")
+                elif not self.persistent:
                     v.settings().erase("tabs_extra_sticky")
-                self.window.focus_view(v)
-                self.window.run_command("close_file")
-            elif not self.persistent:
-                v.settings().erase("tabs_extra_sticky")
 
-        if not self.persistent and self.cleanup:
-            self.window.run_command("tabs_extra_clear_all_sticky", {"group": group})
+            if not self.persistent and self.cleanup:
+                self.window.run_command("tabs_extra_clear_all_sticky", {"group": group})
 
 
 class TabsExtraListener(sublime_plugin.EventListener):
     def on_window_command(self, window, command_name, args):
+        cmd = None
         if command_name == "close_by_index":
             command_name = "tabs_extra"
             args["close_type"] = "single"
-            return (command_name, args)
+            cmd = (command_name, args)
         elif command_name == "close_others_by_index":
             command_name = "tabs_extra"
             args["close_type"] = "other"
-            return (command_name, args)
+            cmd = (command_name, args)
         elif command_name == "close_to_right_by_index":
             command_name = "tabs_extra"
             args["close_type"] = "right"
-            return (command_name, args)
-        return None
+            cmd = (command_name, args)
+        return cmd
 
 
 class TabsExtraInstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
