@@ -165,9 +165,19 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
 class TabsExtraListener(sublime_plugin.EventListener):
     def on_window_command(self, window, command_name, args):
         cmd = None
-        if command_name == "close_by_index":
+        if args is None:
+            view = window.active_view()
+            if view is None:
+                return cmd
+            group, index = window.get_view_index(view)
+            args = {"group": group, "index": index}
+        if command_name in ["close_by_index", "close"]:
             command_name = "tabs_extra"
             args["close_type"] = "single"
+            cmd = (command_name, args)
+        elif command_name == "close_all":
+            command_name = "tabs_extra"
+            args["close_type"] = "all"
             cmd = (command_name, args)
         elif command_name == "close_others_by_index":
             command_name = "tabs_extra"
