@@ -39,7 +39,7 @@ By default TabsExtra keeps the current active tab focused, but if the active tab
 By default, the commands won't be grouped together because of the way Sublime Text menus are managed.  But you can optionally install a menu that overrides the Default Package's tab context menu for sane grouping of the commands.
 
 # ST2 Support?
-ST2 support is not officially complete.  For best functionality, it is recommended to install the override menu for the Default tab context menu.
+ST2 support is not officially complete, nor will all of the features ever be able to work.  For best functionality, it is recommended to install the override menu for the Default tab context menu.  Don't bother filing bugs for ST2; I will ignore them.  I will take pull requests for ST2 though.
 
 Sublime Text 2 will pop up a warning reminding you that ST2 support is not final.  You can disable it in the settings file by adding this setting:
 
