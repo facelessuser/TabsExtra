@@ -2,5 +2,8 @@
     // By default TabsExtra forgets a tab's "stickiness" when
     // any "tab close" command is issued.  You can make the tab's
     // "Stickiness" persist by enabling the following feature.
-    "persistent_sticky": false
+    "persistent_sticky": false,
+
+    // If active window gets closed, default to (left|right)
+    "fallback_focus": "right"
 }

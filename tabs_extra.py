@@ -10,6 +10,9 @@ DEFAULT_PACKAGE = "Default"
 TAB_MENU = "Tab Context.sublime-menu"
 SETTINGS = "tabs_extra.sublime-settings"
 
+LEFT = 0
+RIGHT = 1
+
 EMPTY_MENU = '''[
 ]
 '''
@@ -88,6 +91,10 @@ def is_persistent():
     return sublime.load_settings(SETTINGS).get("persistent_sticky", False)
 
 
+def get_fallback_direction():
+    return LEFT if sublime.load_settings(SETTINGS).get("fallback_focus", "left") == "left" else RIGHT
+
+
 class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
     def run(self, group=-1, force=False):
         if group >= 0:
@@ -123,27 +130,81 @@ class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
         return checked
 
 
+class TabsExtraAllCommand(sublime_plugin.WindowCommand):
+    def run(self):
+        for group in range(0, self.window.num_groups()):
+            view = self.window.active_view_in_group(group)
+            if view is not None:
+                index = self.window.get_view_index(view)[1]
+                self.window.run_command("tabs_extra", {"close_type": "all", "group": group, "index": index})
+
+
 class TabsExtraCommand(sublime_plugin.WindowCommand):
     def init(self, close_type, group, index):
         self.persistent = is_persistent()
-        views = self.window.views_in_group(int(group))
+        self.views = self.window.views_in_group(int(group))
         assert(close_type in ["single", "left", "right", "other", "all"])
 
+        active_view = self.window.active_view()
+        active_index = None
+        self.active_index = index
+        self.active_group = None
+        if active_view is not None:
+            active_group, active_index = self.window.get_view_index(active_view)
+            if group != active_group:
+                active_index = None
+
+        if active_index is not None:
+            self.active_index = active_index
+
         if close_type == "single":
-            self.targets = [views.pop(index)]
-            self.cleanup = bool(len(views[:index] + views[index + 1:]))
+            self.targets = [self.views[index]]
+            self.cleanup = bool(len(self.views[:index] + self.views[index + 1:]))
         elif close_type == "left":
-            self.targets = views[:index]
-            self.cleanup = bool(len(views[index:]))
+            self.targets = self.views[:index]
+            self.cleanup = bool(len(self.views[index:]))
         elif close_type == "right":
-            self.targets = views[index + 1:]
-            self.cleanup = bool(len(views[:index + 1]))
+            self.targets = self.views[index + 1:]
+            self.cleanup = bool(len(self.views[:index + 1]))
         elif close_type == "other":
-            self.targets = views[:index] + views[index + 1:]
+            self.targets = self.views[:index] + self.views[index + 1:]
             self.cleanup = True
         elif close_type == "all":
-            self.targets = views[:]
+            self.targets = self.views[:]
             self.cleanup = False
+
+    def select_left(self):
+        selected = False
+        for x in reversed(range(0, self.active_index)):
+            if self.window.get_view_index(self.views[x])[1] != -1:
+                self.window.focus_view(self.views[x])
+                selected = True
+                break
+        return selected
+
+    def select_right(self):
+        selected = False
+        for x in range(self.active_index + 1, len(self.views)):
+            if self.window.get_view_index(self.views[x])[1] != -1:
+                self.window.focus_view(self.views[x])
+                selected = True
+                break
+        return selected
+
+    def select_view(self):
+        selected = False
+        if self.active_index is not None:
+            if self.window.get_view_index(self.views[self.active_index])[1] != -1:
+                self.window.focus_view(self.views[self.active_index])
+                selected = True
+            elif get_fallback_direction() == LEFT:
+                selected = self.select_left()
+                if not selected:
+                    self.select_right()
+            else:
+                selected = self.select_right()
+                if not selected:
+                    self.select_left()
 
     def run(self, group=-1, index=-1, close_type="single"):
         if group >= 0 or index >= 0:
@@ -161,6 +222,8 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
             if not self.persistent and self.cleanup:
                 self.window.run_command("tabs_extra_clear_all_sticky", {"group": group})
 
+            self.select_view()
+
 
 class TabsExtraListener(sublime_plugin.EventListener):
     def on_window_command(self, window, command_name, args):
@@ -176,8 +239,8 @@ class TabsExtraListener(sublime_plugin.EventListener):
             args["close_type"] = "single"
             cmd = (command_name, args)
         elif command_name == "close_all":
-            command_name = "tabs_extra"
-            args["close_type"] = "all"
+            command_name = "tabs_extra_all"
+            args = {}
             cmd = (command_name, args)
         elif command_name == "close_others_by_index":
             command_name = "tabs_extra"
