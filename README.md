@@ -1,5 +1,6 @@
 TabsExtra
 =========
+<img src="https://dl.dropboxusercontent.com/u/342698/TabsExtra/tabs_extra.png" border="0"/>
 
 Sublime Plugin with sticky tabs and more tab closing options.  ST3 is the only **officially** supported platform.
 
