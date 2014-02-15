@@ -31,8 +31,13 @@
                             },
                             { "caption": "-" },
                             {
+                                "command": "tabs_extra_install_menu",
+                                "caption": "Install/Upgrade TabsExtra Menu"
+                            },
+                            { "caption": "-" },
+                            {
                                 "command": "tabs_extra_install_override_menu",
-                                "caption": "Install Default Override Menu"
+                                "caption": "Install/Upgrade Default Override Menu"
                             },
                             {
                                 "command": "tabs_extra_uninstall_override_menu",
