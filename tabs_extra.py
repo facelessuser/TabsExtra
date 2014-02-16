@@ -1,76 +1,19 @@
+"""
+TabsExtra
+
+Copyright (c) 2014 Isaac Muse <isaacmuse@gmail.com>
+License: MIT
+"""
 import sublime_plugin
 import sublime
-from os.path import join, exists
-from os import makedirs, remove, rename
-import json
-from .lib.file_strip.json import sanitize_json
+from . import tab_menu
 
-PACKAGE_NAME = "TabsExtra"
-DEFAULT_PACKAGE = "Default"
-TAB_MENU = "Tab Context.sublime-menu"
 SETTINGS = "tabs_extra.sublime-settings"
-VERSION_FILE = "version.json"
 
 LEFT = 0
 RIGHT = 1
 
-__format__ = "1.0.0"
-
-CHANGES = '''
-- Check menu formats
-'''
-
-FORMAT_VERSION = {
-    "version": __format__,
-    "override": False
-}
-
-
-DEFAULT_MENU = '''[
-    { "caption": "-", "id": "tabs_extra_sticky" },
-    { "command": "tabs_extra_toggle_sticky", "args": { "group": -1, "index": -1 }, "caption": "Sticky Tab" },
-    { "command": "tabs_extra_clear_all_sticky", "args": { "group": -1, "force": true }, "caption": "Clear All Sticky Tabs" },
-    { "caption": "-", "id": "tabs_extra" },
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "all"}, "caption": "Close All Tabs" },
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "left" }, "caption": "Close Tabs to the Left" }
-]
-'''
-
-OVERRIDE_MENU = '''
-[
-    // { "caption": "-", "id": "tabs_extra" },
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "single" }, "caption": "Close" },
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "all"}, "caption": "Close All Tabs" },
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "other" }, "caption": "Close Other Tabs" },
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "right" }, "caption": "Close Tabs to the Right" },
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "left" }, "caption": "Close Tabs to the Left" },
-    { "caption": "-" },
-    { "command": "tabs_extra_toggle_sticky", "args": { "group": -1, "index": -1 }, "caption": "Sticky Tab" },
-    { "command": "tabs_extra_clear_all_sticky", "args": { "group": -1, "force": true }, "caption": "Clear All Sticky Tabs" },
-    { "caption": "-" },
-    { "command": "new_file", "caption": "New File" },
-    { "command": "prompt_open_file", "caption": "Open File" }
-]
-'''
-
-BACKUP_MENU = '''[
-    { "command": "close_by_index", "args": { "group": -1, "index": -1 }, "caption": "Close" },
-    { "command": "close_others_by_index", "args": { "group": -1, "index": -1 }, "caption": "Close others" },
-    { "command": "close_to_right_by_index", "args": { "group": -1, "index": -1 }, "caption": "Close tabs to the right" },
-    { "caption": "-" },
-    { "command": "new_file" },
-    { "command": "prompt_open_file", "caption": "Open file" }
-]
-'''
-
 OVERRIDE_CONFIRM = '''TabsExtra will overwrite the entire "Tab Context.sublime-menu" file in "Packages/Default" with a new one.  ST3 keeps an unmodified copy in the archive.
-
-You do this at your own risk.  If something goes wrong, you may need to manually fix the menu.
-
-Are you sure you want to continue?
-'''
-
-OVERRIDE_CONFIRM2 = '''TabsExtra will overwrite the entire "Tab Context.sublime-menu" file in "Packages/Default" with a new one.  In ST2, TabsExtra will backup the current menu, but updates may wipe out the override menu and may require you to re-install the override menu.
 
 You do this at your own risk.  If something goes wrong, you may need to manually fix the menu.
 
@@ -83,30 +26,6 @@ You do this at your own risk.  If something goes wrong, you may need to manually
 
 Are you sure you want to continue?
 '''
-
-UPGRADE_MSG = '''
- /$$$$$$$$        /$$                 /$$$$$$$$             /$$
-|__  $$__/       | $$                | $$_____/            | $$
-   | $$  /$$$$$$ | $$$$$$$   /$$$$$$$| $$       /$$   /$$ /$$$$$$    /$$$$$$  /$$$$$$
-   | $$ |____  $$| $$__  $$ /$$_____/| $$$$$   |  $$ /$$/|_  $$_/   /$$__  $$|____  $$
-   | $$  /$$$$$$$| $$  \ $$|  $$$$$$ | $$__/    \  $$$$/   | $$    | $$  \__/ /$$$$$$$
-   | $$ /$$__  $$| $$  | $$ \____  $$| $$        >$$  $$   | $$ /$$| $$      /$$__  $$
-   | $$|  $$$$$$$| $$$$$$$/ /$$$$$$$/| $$$$$$$$ /$$/\  $$  |  $$$$/| $$     |  $$$$$$$
-   |__/ \_______/|_______/ |_______/ |________/|__/  \__/   \___/  |__/      \_______/
-
-
-======================================================================================
-
-Menu format upgraded to version (%(format)s). To pick up these changes, do one of the following:
-
-1. If using the override menu, select "Preferences->Package Settings->TabsExtra->Install/Upgrade Default Override Menu" from Sublime's menu.
-
-2. If using the default menu, select "Preferences->Package Settings->TabsExtra->Install/Upgrade TabsExtra Menu" from the menu" from Sublime's menu.
-
-======================================================================================
-
-Changes:
-%(changes)s''' % {"format": __format__, "changes": CHANGES}
 
 
 def is_persistent():
@@ -273,7 +192,10 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
                 if not selected:
                     self.select_left()
 
-    def run(self, group=-1, index=-1, close_type="single"):
+    def run(
+        self, group=-1, index=-1,
+        close_type="single", unsaved_prompt=True, close_unsaved=True
+    ):
         """
         Close the specified tabs and cleanup sticky states.
         """
@@ -286,7 +208,10 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
                     if not self.persistent:
                         v.settings().erase("tabs_extra_sticky")
                     self.window.focus_view(v)
-                    self.window.run_command("close_file")
+                    if not v.is_dirty() or close_unsaved:
+                        if v.is_dirty() and not unsaved_prompt:
+                            v.set_scratch(True)
+                        self.window.run_command("close_file")
                 elif not self.persistent:
                     v.settings().erase("tabs_extra_sticky")
 
@@ -328,6 +253,32 @@ class TabsExtraListener(sublime_plugin.EventListener):
         return cmd
 
 
+class TabsExtraViewWrapperCommand(sublime_plugin.WindowCommand):
+    def run(self, command, group=-1, index=-1, args={}):
+        if group >= 0 or index >= 0:
+            self.window.focus_view(self.window.views_in_group(int(group))[index])
+            self.window.run_command(command, args)
+
+
+class TabsExtraRevertCommand(TabsExtraViewWrapperCommand):
+    def is_visible(self, command, group=-1, index=-1, args={}):
+        enabled = False
+        if group >= 0 or index >= 0:
+            view = self.window.views_in_group(int(group))[index]
+            if view.file_name() is not None:
+                enabled = view.is_dirty()
+        return enabled
+
+
+class TabsExtraFileCommand(TabsExtraViewWrapperCommand):
+    def is_enabled(self, command, group=-1, index=-1, args={}):
+        enabled = False
+        if group >= 0 or index >= 0:
+            view = self.window.views_in_group(int(group))[index]
+            enabled = view.file_name() is not None
+        return enabled
+
+
 class TabsExtraInstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
     def run(self):
         """
@@ -336,22 +287,7 @@ class TabsExtraInstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
 
         msg = OVERRIDE_CONFIRM
         if sublime.ok_cancel_dialog(msg):
-            menu_path = join(sublime.packages_path(), "User", PACKAGE_NAME)
-            version_file = join(menu_path, VERSION_FILE)
-            if not exists(menu_path):
-                makedirs(menu_path)
-            menu = join(menu_path, TAB_MENU)
-            if exists(menu):
-                remove(menu)
-            default_path = join(sublime.packages_path(), "Default")
-            if not exists(default_path):
-                makedirs(default_path)
-            default_menu = join(default_path, TAB_MENU)
-            with open(default_menu, "w") as f:
-                f.write(OVERRIDE_MENU)
-            with open(version_file, "w") as f:
-                FORMAT_VERSION["override"] = True
-                f.write(json.dumps(FORMAT_VERSION, sort_keys=True, indent=4, separators=(',', ': ')))
+            tab_menu.upgrade_override_menu()
 
 class TabsExtraUninstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
     def run(self):
@@ -361,11 +297,7 @@ class TabsExtraUninstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
 
         msg = RESTORE_CONFIRM
         if sublime.ok_cancel_dialog(msg):
-            default_path = join(sublime.packages_path(), "Default")
-            default_menu = join(default_path, TAB_MENU)
-            if exists(default_menu):
-                remove(default_menu)
-            upgrade_default_menu()
+            tab_menu.uninstall_override_menu()
 
 
 class TabsExtraInstallMenuCommand(sublime_plugin.ApplicationCommand):
@@ -374,8 +306,7 @@ class TabsExtraInstallMenuCommand(sublime_plugin.ApplicationCommand):
         Install/upgrade the standard tab menu.
         """
 
-        upgrade_default_menu()
-
+        tab_menu.upgrade_default_menu()
 
 
 class TabsExtraMessageCommand(sublime_plugin.TextCommand):
@@ -388,56 +319,4 @@ class TabsExtraMessageCommand(sublime_plugin.TextCommand):
         self.view.settings().set("word_wrap", True)
         self.view.set_syntax_file("Packages/Text/Plain text.tmLanguage")
         self.view.settings().set("font_face", "Courier New")
-        self.view.insert(edit, 0, UPGRADE_MSG)
-
-
-def upgrade_default_menu():
-    """
-    Install/upgrade the standard tab menu.
-    """
-    menu_path = join(sublime.packages_path(), "User", PACKAGE_NAME)
-    menu = join(menu_path, TAB_MENU)
-    version_file = join(menu_path, VERSION_FILE)
-    if not exists(menu_path):
-        makedirs(menu_path)
-    with open(menu, "w") as f:
-        f.write(DEFAULT_MENU)
-    FORMAT_VERSION["override"] = False
-    with open(version_file, "w") as f:
-        f.write(json.dumps(FORMAT_VERSION, sort_keys=True, indent=4, separators=(',', ': ')))
-
-
-def plugin_loaded():
-    """
-    Install menu if nothing can be found. Alert the user to a menu upgrade if one is found.
-    """
-
-    menu_path = join(sublime.packages_path(), "User", PACKAGE_NAME)
-    if not exists(menu_path):
-        makedirs(menu_path)
-        upgrade_default_menu()
-        return
-    menu = join(menu_path, TAB_MENU)
-    version_file = join(menu_path, VERSION_FILE)
-    upgrade = False
-    if not exists(version_file):
-        upgrade = True
-    else:
-        v_old = {}
-        try:
-            with open(version_file, "r") as f:
-                v_old = json.loads(sanitize_json(f.read(), preserve_lines=True))
-        except Exception as e:
-            print(e)
-            pass
-
-        if FORMAT_VERSION["version"] != v_old.get("version", ""):
-            upgrade = True
-
-    if upgrade:
-        win = sublime.active_window()
-        if win is not None:
-            view = win.new_file()
-            if view is not None:
-                view.set_name("TabsExtra Message")
-                view.run_command("tabs_extra_message")
+        self.view.insert(edit, 0, tab_menu.UPGRADE_MSG)
