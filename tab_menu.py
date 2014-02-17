@@ -55,10 +55,9 @@ Changes:
 %(changes)s
 ''' % {"format": __format__, "changes": '\n'.join(["- %s" % change for change in __changes__])}
 
-OVERRIDE_CLOSE_OPTIONS = '''    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "single" }, "caption": "Close" },
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "other" }, "caption": "Close Other Tabs" },
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "right" }, "caption": "Close Tabs to the Right" },'''
-
+###############################
+# Menu Options
+###############################
 CLOSE_OPTIONS = '''    { "caption": "-"},
 %(override)s
     { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "left" }, "caption": "Close Tabs to the Left" },
@@ -98,9 +97,6 @@ SAVE_OPTIONS = '''    { "caption": "-" },
 CLONE_OPTIONS = '''    { "caption": "-" },
     { "command": "tabs_extra_view_wrapper", "args": {"group": -1, "index": -1, "command": "clone_file"}, "caption": "Clone" }'''
 
-OVERRIDE_OPEN_OPTIONS = '''    { "command": "new_file", "caption": "New File" },
-    { "command": "prompt_open_file", "caption": "Open File" },'''
-
 OPEN_OPTIONS = '''    { "caption": "-" },
 %(override)s
     { "command": "reopen_last_file", "caption": "Reopen Last Tab" }'''
@@ -114,6 +110,17 @@ PATH_OPTIONS = '''    { "caption": "-" },
 
 REVERT_OPTIONS = '''    { "caption": "-" },
     { "command": "tabs_extra_revert", "args": {"group": -1, "index": -1, "command": "revert"}, "caption": "Revert File" }'''
+
+###############################
+# Override Menu Options
+###############################
+OVERRIDE_CLOSE_OPTIONS = '''    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "single" }, "caption": "Close" },
+    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "other" }, "caption": "Close Other Tabs" },
+    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "right" }, "caption": "Close Tabs to the Right" },'''
+
+OVERRIDE_OPEN_OPTIONS = '''    { "command": "new_file", "caption": "New File" },
+    { "command": "prompt_open_file", "caption": "Open File" },'''
+
 
 MENU_MAP = {
     "close": CLOSE_OPTIONS,
