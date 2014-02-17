@@ -307,16 +307,3 @@ class TabsExtraInstallMenuCommand(sublime_plugin.ApplicationCommand):
         """
 
         tab_menu.upgrade_default_menu()
-
-
-class TabsExtraMessageCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        """
-        Display upgrade message.
-        """
-
-        self.view.set_scratch(True)
-        self.view.settings().set("word_wrap", True)
-        self.view.set_syntax_file("Packages/Text/Plain text.tmLanguage")
-        self.view.settings().set("font_face", "Courier New")
-        self.view.insert(edit, 0, tab_menu.UPGRADE_MSG)

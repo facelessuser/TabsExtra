@@ -5,6 +5,7 @@ Copyright (c) 2014 Isaac Muse <isaacmuse@gmail.com>
 License: MIT
 """
 import sublime
+import sublime_plugin
 from os.path import join, exists
 from os import makedirs, remove, rename
 import json
@@ -12,20 +13,18 @@ from .lib.file_strip.json import sanitize_json
 import codecs
 
 __format__ = "1.1.0"
-
-PACKAGE_NAME = "TabsExtra"
-DEFAULT_PACKAGE = "Default"
-SETTINGS = "tabs_extra.sublime-settings"
-TAB_MENU = "Tab Context.sublime-menu"
-VERSION_FILE = "version.json"
-
-CHANGES = [
+__changes__ = [
     "Check menu formats and prompt for upgrades.",
     "Add close options that can skip unsaved files or dismiss unsaved files without a prompt.",
     "Add save, reveal, file path, reopen tabs, and revert options to tab menu."
     "Allow reordering or excluding items from the tab menu via the settings file."
 ]
 
+PACKAGE_NAME = "TabsExtra"
+DEFAULT_PACKAGE = "Default"
+SETTINGS = "tabs_extra.sublime-settings"
+TAB_MENU = "Tab Context.sublime-menu"
+VERSION_FILE = "version.json"
 FORMAT_VERSION = {
     "version": __format__,
     "override": False
@@ -54,13 +53,11 @@ Menu format upgraded to version (%(format)s). To pick up these changes, do one o
 
 Changes:
 %(changes)s
-''' % {"format": __format__, "changes": '\n'.join(["- %s" % change for change in CHANGES])}
+''' % {"format": __format__, "changes": '\n'.join(["- %s" % change for change in __changes__])}
 
-OVERRIDE_CLOSE_OPTIONS = '''
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "single" }, "caption": "Close" },
+OVERRIDE_CLOSE_OPTIONS = '''    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "single" }, "caption": "Close" },
     { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "other" }, "caption": "Close Other Tabs" },
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "right" }, "caption": "Close Tabs to the Right" },
-'''
+    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "right" }, "caption": "Close Tabs to the Right" },'''
 
 CLOSE_OPTIONS = '''    { "caption": "-"},
 %(override)s
@@ -89,7 +86,7 @@ CLOSE_OPTIONS = '''    { "caption": "-"},
         ]
     }'''
 
-STICKY_OPTIONS = '''{ "caption": "-" },
+STICKY_OPTIONS = '''    { "caption": "-" },
     { "command": "tabs_extra_toggle_sticky", "args": { "group": -1, "index": -1 }, "caption": "Sticky Tab" },
     { "command": "tabs_extra_clear_all_sticky", "args": { "group": -1, "force": true }, "caption": "Clear All Sticky Tabs" }'''
 
@@ -102,8 +99,7 @@ CLONE_OPTIONS = '''    { "caption": "-" },
     { "command": "tabs_extra_view_wrapper", "args": {"group": -1, "index": -1, "command": "clone_file"}, "caption": "Clone" }'''
 
 OVERRIDE_OPEN_OPTIONS = '''    { "command": "new_file", "caption": "New File" },
-    { "command": "prompt_open_file", "caption": "Open File" },
-'''
+    { "command": "prompt_open_file", "caption": "Open File" },'''
 
 OPEN_OPTIONS = '''    { "caption": "-" },
 %(override)s
@@ -118,11 +114,6 @@ PATH_OPTIONS = '''    { "caption": "-" },
 
 REVERT_OPTIONS = '''    { "caption": "-" },
     { "command": "tabs_extra_revert", "args": {"group": -1, "index": -1, "command": "revert"}, "caption": "Revert File" }'''
-
-MENU = '''[
-%s
-]
-'''
 
 MENU_MAP = {
     "close": CLOSE_OPTIONS,
@@ -140,7 +131,24 @@ OVERRIDE_MAP = {
 }
 
 
+class TabsExtraMessageCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        """
+        Display upgrade message.
+        """
+
+        self.view.set_scratch(True)
+        self.view.settings().set("word_wrap", True)
+        self.view.set_syntax_file("Packages/Text/Plain text.tmLanguage")
+        self.view.settings().set("font_face", "Courier New")
+        self.view.insert(edit, 0, UPGRADE_MSG)
+
+
 def get_menu(override=False):
+    """
+    Return the formatted tab menu.
+    """
+
     default_layout = ["close", "sticky", "open", "clone", "save", "reveal", "path", "revert"]
     layout = sublime.load_settings("tabs_extra.sublime-settings").get("menu_layout", default_layout)
     entries = []
@@ -151,10 +159,14 @@ def get_menu(override=False):
                 continue
             entries.append(MENU_MAP[entry])
 
-    return MENU % (',\n'.join(entries))
+    return "[\n%s\n]\n" % (',\n'.join(entries))
 
 
 def upgrade_override_menu():
+    """
+    Install/Upgrade the override menu.
+    """
+
     menu_path = join(sublime.packages_path(), "User", PACKAGE_NAME)
     version_file = join(menu_path, VERSION_FILE)
     if not exists(menu_path):
@@ -174,6 +186,10 @@ def upgrade_override_menu():
 
 
 def uninstall_override_menu():
+    """
+    Uninstall the override menu.  Re-install the default TabsExtra menu.
+    """
+
     default_path = join(sublime.packages_path(), "Default")
     default_menu = join(default_path, TAB_MENU)
     if exists(default_menu):
@@ -185,6 +201,7 @@ def upgrade_default_menu():
     """
     Install/upgrade the standard tab menu.
     """
+
     menu_path = join(sublime.packages_path(), "User", PACKAGE_NAME)
     menu = join(menu_path, TAB_MENU)
     version_file = join(menu_path, VERSION_FILE)
