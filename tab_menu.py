@@ -166,7 +166,8 @@ def get_menu(override=False):
                 continue
             entries.append(MENU_MAP[entry])
 
-    return "[\n%s\n]\n" % (',\n'.join(entries))
+    menu = "[\n%s\n]\n" % (',\n'.join(entries))
+    return (menu).encode("cp1252").decode("utf-8") if sublime.platform() == "windows" else menu
 
 
 def upgrade_override_menu():
