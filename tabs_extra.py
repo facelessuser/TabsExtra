@@ -6,12 +6,14 @@ License: MIT
 """
 import sublime_plugin
 import sublime
+import time
 from . import tab_menu
 
 SETTINGS = "tabs_extra.sublime-settings"
 
 LEFT = 0
 RIGHT = 1
+LAST = 2
 
 OVERRIDE_CONFIRM = '''TabsExtra will overwrite the entire "Tab Context.sublime-menu" file in "Packages/Default" with a new one.  ST3 keeps an unmodified copy in the archive.
 
@@ -41,7 +43,13 @@ def get_fallback_direction():
     Get the focused tab fallback direction.
     """
 
-    return LEFT if sublime.load_settings(SETTINGS).get("fallback_focus", "left") == "left" else RIGHT
+    mode = LEFT
+    value = sublime.load_settings(SETTINGS).get("fallback_focus", "left")
+    if value == "last_active":
+        mode = LAST
+    elif value == "right":
+        mode = RIGHT
+    return mode
 
 
 class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
@@ -119,6 +127,7 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
         self.views = self.window.views_in_group(int(group))
         assert(close_type in ["single", "left", "right", "other", "all"])
 
+        # Setup active index and group
         active_view = self.window.active_view()
         active_index = None
         self.active_index = index
@@ -127,10 +136,17 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
             active_group, active_index = self.window.get_view_index(active_view)
             if group != active_group:
                 active_index = None
-
         if active_index is not None:
             self.active_index = active_index
 
+        # Compile a list of existing tabs with their timestamps
+        self.last_activated = []
+        for v in self.views:
+            last_activated = v.settings().get("tabs_extra_last_activated", None)
+            if last_activated is not None:
+                self.last_activated.append((last_activated, v))
+
+        # Determine targeted views to close and views to cleanup
         if close_type == "single":
             self.targets = [self.views[index]]
             self.cleanup = bool(len(self.views[:index] + self.views[index + 1:]))
@@ -147,7 +163,7 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
             self.targets = self.views[:]
             self.cleanup = False
 
-    def select_left(self):
+    def select_left(self, fallback=True):
         """
         Select tab to the left if the current active tab was closed.
         """
@@ -158,9 +174,12 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
                 self.window.focus_view(self.views[x])
                 selected = True
                 break
+        if fallback and not selected:
+            # Fallback to other direction
+            selected = self.select_left(False)
         return selected
 
-    def select_right(self):
+    def select_right(self, fallback=True):
         """
         Select tab to the right if the current active tab was closed.
         """
@@ -171,6 +190,34 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
                 self.window.focus_view(self.views[x])
                 selected = True
                 break
+        if fallback and not selected:
+            # Fallback to other direction
+            selected = self.select_right(False)
+        return selected
+
+
+    def select_last(self, fallback=True):
+        """
+        Select last activated tab if available.
+        """
+
+        selected = False
+        self.last_activated.sort()
+
+        if len(self.last_activated):
+            # Get most recent activated tab
+            for v in reversed(self.last_activated):
+                if self.window.get_view_index(v[1])[1] != -1:
+                    self.window.focus_view(v[1])
+                    selected = True
+                    break
+
+        if fallback and not selected:
+            # Fallback left
+            selected = self.select_left(False)
+        if fallback and not selected:
+            # Fallback right
+            selected = self.select_right(False)
         return selected
 
     def select_view(self):
@@ -180,17 +227,16 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
 
         selected = False
         if self.active_index is not None:
+            fallback_mode = get_fallback_direction()
             if self.window.get_view_index(self.views[self.active_index])[1] != -1:
                 self.window.focus_view(self.views[self.active_index])
                 selected = True
-            elif get_fallback_direction() == LEFT:
-                selected = self.select_left()
-                if not selected:
-                    self.select_right()
+            elif fallback_mode == LAST:
+                self.select_last()
+            elif fallback_mode == RIGHT:
+                self.select_right()
             else:
-                selected = self.select_right()
-                if not selected:
-                    self.select_left()
+                self.select_left()
 
     def run(
         self, group=-1, index=-1,
@@ -252,9 +298,20 @@ class TabsExtraListener(sublime_plugin.EventListener):
             cmd = (command_name, args)
         return cmd
 
+    def on_activated(self, view):
+        """
+        Timestamp each view when activated.
+        """
+
+        view.settings().set('tabs_extra_last_activated', time.time())
+
 
 class TabsExtraViewWrapperCommand(sublime_plugin.WindowCommand):
     def run(self, command, group=-1, index=-1, args={}):
+        """
+        Wrap command in order to ensure view gets focused first.
+        """
+
         if group >= 0 or index >= 0:
             self.window.focus_view(self.window.views_in_group(int(group))[index])
             self.window.run_command(command, args)
@@ -262,6 +319,10 @@ class TabsExtraViewWrapperCommand(sublime_plugin.WindowCommand):
 
 class TabsExtraRevertCommand(TabsExtraViewWrapperCommand):
     def is_visible(self, command, group=-1, index=-1, args={}):
+        """
+        Determine if command should be visible in menu.
+        """
+
         enabled = False
         if group >= 0 or index >= 0:
             view = self.window.views_in_group(int(group))[index]
@@ -272,6 +333,10 @@ class TabsExtraRevertCommand(TabsExtraViewWrapperCommand):
 
 class TabsExtraFileCommand(TabsExtraViewWrapperCommand):
     def is_enabled(self, command, group=-1, index=-1, args={}):
+        """
+        Determine if command should be enabled.
+        """
+
         enabled = False
         if group >= 0 or index >= 0:
             view = self.window.views_in_group(int(group))[index]

@@ -4,7 +4,7 @@
     // "Stickiness" persist by enabling the following feature.
     "persistent_sticky": false,
 
-    // If active window gets closed, default to (left|right)
+    // If active window gets closed, default to (left|right|last_active)
     "fallback_focus": "right",
 
     // Menu layout include or exclude, in whatever order you desire, the following options:

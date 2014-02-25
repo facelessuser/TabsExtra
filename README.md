@@ -23,6 +23,9 @@ TabsExtra does **not** override `close_file`, but it does override the following
 - `close_others_by_index`: close other tabs in current group
 - `close_to_right_by_index` close tabs to right in current group
 
+# What TabsExtra Cannot Do
+TabsExtra **cannot** override the tab close button.  It calls an unknown, uninterceptable command.  I personally turn off the close button in my theme for this very reason, but if you leave it accessible, just know that TabsExtra can do nothing to hijack and override what it calls.  I am open to suggestions if a clever workaround comes to light.
+
 # Sticky Tab Settings
 By default, after any `Close` command is run, all `Sticky` tab properties are forgotten.  You can make a tab's `Stickiness` persist by enabling the following setting:
 
@@ -31,10 +34,10 @@ By default, after any `Close` command is run, all `Sticky` tab properties are fo
 ```
 
 # Tab Focus After Close
-By default TabsExtra keeps the current active tab focused, but if the active tab gets deleted, TabsExtra will default to either the next left or right tab (depending how the user has it set).
+By default TabsExtra keeps the current active tab focused, but if the active tab gets deleted, TabsExtra will default to either the left, right, or last active tab (depending how the user has it set).  Will not work if you use the tab close button since the method that is called by the button is uniterceptable.
 
 ```javascript
-    // If active window gets closed, default to (left|right)
+    // If active window gets closed, default to (left|right|last_active)
     "fallback_focus": "right"
 ```
 
