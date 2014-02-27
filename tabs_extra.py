@@ -393,8 +393,8 @@ class TabsExtraListener(sublime_plugin.EventListener):
             window.focus_view(views[closed_index])
             views[closed_index].settings().set('tabs_extra_last_activated', time.time())
             selected = True
-        if not selectd and fallback:
-            selectd = self.select_left(views, window, closed_index, False)
+        if not selected and fallback:
+            selected = self.select_left(views, window, closed_index, False)
         return selected
 
     def select_left(self, views, window, closed_index, fallback=True):
@@ -407,8 +407,8 @@ class TabsExtraListener(sublime_plugin.EventListener):
             window.focus_view(views[closed_index - 1])
             views[closed_index - 1].settings().set('tabs_extra_last_activated', time.time())
             selected = True
-        if not selectd and fallback:
-            selectd = self.select_right(views, window, closed_index, False)
+        if not selected and fallback:
+            selected = self.select_right(views, window, closed_index, False)
         return selected
 
 
