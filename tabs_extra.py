@@ -172,6 +172,7 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
         for x in reversed(range(0, self.active_index)):
             if self.window.get_view_index(self.views[x])[1] != -1:
                 self.window.focus_view(self.views[x])
+                self.view[x].settings().set('tabs_extra_last_activated', time.time())
                 selected = True
                 break
         if fallback and not selected:
@@ -188,6 +189,7 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
         for x in range(self.active_index + 1, len(self.views)):
             if self.window.get_view_index(self.views[x])[1] != -1:
                 self.window.focus_view(self.views[x])
+                self.view[x].settings().set('tabs_extra_last_activated', time.time())
                 selected = True
                 break
         if fallback and not selected:
@@ -209,6 +211,7 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
             for v in reversed(self.last_activated):
                 if self.window.get_view_index(v[1])[1] != -1:
                     self.window.focus_view(v[1])
+                    v[1].settings().set('tabs_extra_last_activated', time.time())
                     selected = True
                     break
 
@@ -246,11 +249,13 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
         Close the specified tabs and cleanup sticky states.
         """
 
+        TabsExtraListener.extra_command_call = True
+
         if group >= 0 or index >= 0:
             self.init(close_type, group, index)
 
             for v in self.targets:
-                if not v.settings().get("tabs_extra_sticky", False):
+                if not v.settings().get("tabs_extra_sticky", False) or close_type == "single":
                     if not self.persistent:
                         v.settings().erase("tabs_extra_sticky")
                     self.window.focus_view(v)
@@ -266,17 +271,28 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
 
             self.select_view()
 
+        TabsExtraListener.extra_command_call = False
+
 
 class TabsExtraListener(sublime_plugin.EventListener):
+    extra_command_call = False
+
     def on_window_command(self, window, command_name, args):
         """
         Intercept and override specific close tab commands.
         """
 
+        extra_command_call = TabsExtraListener.extra_command_call
+
         cmd = None
         if args is None:
             view = window.active_view()
             if view is None:
+                return cmd
+            # Mark all actual file closes done from TabsExtra
+            # This helps us know when file close was called outside of TabsExtra commands
+            if extra_command_call and command_name == "close_file":
+                view.settings().set("tabs_extra_closing", True)
                 return cmd
             group, index = window.get_view_index(view)
             args = {"group": group, "index": index}
@@ -298,12 +314,102 @@ class TabsExtraListener(sublime_plugin.EventListener):
             cmd = (command_name, args)
         return cmd
 
+    def on_pre_close(self, view):
+        """
+        If a view is closing without being marked, we know it was done outside of TabsExtra.
+        Attach view and window info so we can focus the right view after close.
+        """
+
+        if not view.settings().get("tabs_extra_closing", False):
+            TabsExtraListener.extra_command_call = True
+            view.settings().set("tabs_extra_view_info", view.window().get_view_index(view))
+            view.settings().set("tabs_extra_window_info", view.window().id())
+
+    def on_close(self, view):
+        """
+        If close command was initiated outside of TabsExtra,
+        focus the correct view in window group.
+        """
+
+        view_info = view.settings().get("tabs_extra_view_info", None)
+        window_info = view.settings().get("tabs_extra_window_info", None)
+        window = None
+        if view_info is not None and window_info is not None:
+            for w in sublime.windows():
+                if w.id() == window_info:
+                    window = w
+                    break
+            if window is not None:
+                views = window.views_in_group(int(view_info[0]))
+                fallback_mode = get_fallback_direction()
+                selected = False
+                if len(views) == 0:
+                    return
+                if fallback_mode == LAST:
+                    self.select_last(views, window, view_info[1])
+                elif fallback_mode == RIGHT:
+                    self.select_right(views, window, view_info[1])
+                else:
+                    self.select_left(views, window, view_info[1])
+            TabsExtraListener.extra_command_call = False
+
     def on_activated(self, view):
         """
         Timestamp each view when activated.
         """
 
-        view.settings().set('tabs_extra_last_activated', time.time())
+        if not TabsExtraListener.extra_command_call:
+            view.settings().set('tabs_extra_last_activated', time.time())
+
+    def select_last(self, views, window, closed_index, fallback=True):
+        """
+        Focus last active view.
+        """
+
+        selected = False
+        last_activated = []
+        for v in views:
+            last = v.settings().get("tabs_extra_last_activated", None)
+            if last is not None:
+                last_activated.append((last, v))
+        last_activated.sort()
+        if len(last_activated):
+            window.focus_view(last_activated[-1][1])
+            last_activated[-1][1].settings().set('tabs_extra_last_activated', time.time())
+            selected = True
+        if not selected and fallback:
+            selected = self.select_left(views, window, closed_index, False)
+        if not selected and fallback:
+            selected = self.select_right(views, window, closed_index, False)
+        return selected
+
+    def select_right(self, views, window, closed_index, fallback=True):
+        """
+        Focus view to the right of closed view.
+        """
+
+        selected = False
+        if len(views) > closed_index:
+            window.focus_view(views[closed_index])
+            views[closed_index].settings().set('tabs_extra_last_activated', time.time())
+            selected = True
+        if not selectd and fallback:
+            selectd = self.select_left(views, window, closed_index, False)
+        return selected
+
+    def select_left(self, views, window, closed_index, fallback=True):
+        """
+        Focus view to the left of closed view.
+        """
+
+        selected = False
+        if len(views) >= closed_index:
+            window.focus_view(views[closed_index - 1])
+            views[closed_index - 1].settings().set('tabs_extra_last_activated', time.time())
+            selected = True
+        if not selectd and fallback:
+            selectd = self.select_right(views, window, closed_index, False)
+        return selected
 
 
 class TabsExtraViewWrapperCommand(sublime_plugin.WindowCommand):
