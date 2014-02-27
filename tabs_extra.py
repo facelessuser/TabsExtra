@@ -172,7 +172,7 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
         for x in reversed(range(0, self.active_index)):
             if self.window.get_view_index(self.views[x])[1] != -1:
                 self.window.focus_view(self.views[x])
-                self.view[x].settings().set('tabs_extra_last_activated', time.time())
+                self.views[x].settings().set('tabs_extra_last_activated', time.time())
                 selected = True
                 break
         if fallback and not selected:
@@ -189,7 +189,7 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
         for x in range(self.active_index + 1, len(self.views)):
             if self.window.get_view_index(self.views[x])[1] != -1:
                 self.window.focus_view(self.views[x])
-                self.view[x].settings().set('tabs_extra_last_activated', time.time())
+                self.views[x].settings().set('tabs_extra_last_activated', time.time())
                 selected = True
                 break
         if fallback and not selected:
@@ -345,12 +345,13 @@ class TabsExtraListener(sublime_plugin.EventListener):
                 selected = False
                 if len(views) == 0:
                     return
-                if fallback_mode == LAST:
-                    self.select_last(views, window, view_info[1])
-                elif fallback_mode == RIGHT:
-                    self.select_right(views, window, view_info[1])
-                else:
-                    self.select_left(views, window, view_info[1])
+                if view_info[1] >= 0:
+                    if fallback_mode == LAST:
+                        self.select_last(views, window, view_info[1])
+                    elif fallback_mode == RIGHT:
+                        self.select_right(views, window, view_info[1])
+                    else:
+                        self.select_left(views, window, view_info[1])
             TabsExtraListener.extra_command_call = False
 
     def on_activated(self, view):
