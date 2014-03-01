@@ -15,6 +15,8 @@ LEFT = 0
 RIGHT = 1
 LAST = 2
 
+LAST_ACTIVE = None
+
 OVERRIDE_CONFIRM = '''TabsExtra will overwrite the entire "Tab Context.sublime-menu" file in "Packages/Default" with a new one.  ST3 keeps an unmodified copy in the archive.
 
 You do this at your own risk.  If something goes wrong, you may need to manually fix the menu.
@@ -28,6 +30,17 @@ You do this at your own risk.  If something goes wrong, you may need to manually
 
 Are you sure you want to continue?
 '''
+
+def log(msg, status=False):
+    string = str(msg)
+    print("TabsExtra: %s" % string)
+    if status:
+        sublime.status_message(string)
+
+
+def debug(s):
+    if sublime.load_settings(SETTINGS).get("debug", False):
+        log(s)
 
 
 def is_persistent():
@@ -50,6 +63,32 @@ def get_fallback_direction():
     elif value == "right":
         mode = RIGHT
     return mode
+
+
+def timestamp_view(view):
+    """
+    Timestamp view.
+    """
+
+    global LAST_ACTIVE
+
+    if (
+        LAST_ACTIVE is not None and
+        not LAST_ACTIVE.settings().get("tabs_extra_is_closed", False) and
+        LAST_ACTIVE.window() is None
+    ):
+        # Skip if moving a tab
+        LAST_ACTIVE = None
+        allow = False
+    else:
+        allow = True
+
+    if allow:
+        view.settings().set('tabs_extra_last_activated', time.time())
+        LAST_ACTIVE = view
+        debug("activated - %s" % view.file_name())
+    else:
+        debug("skipping - %s" % view.file_name())
 
 
 class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
@@ -172,7 +211,7 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
         for x in reversed(range(0, self.active_index)):
             if self.window.get_view_index(self.views[x])[1] != -1:
                 self.window.focus_view(self.views[x])
-                self.views[x].settings().set('tabs_extra_last_activated', time.time())
+                timestamp_view(self.views[x])
                 selected = True
                 break
         if fallback and not selected:
@@ -189,7 +228,7 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
         for x in range(self.active_index + 1, len(self.views)):
             if self.window.get_view_index(self.views[x])[1] != -1:
                 self.window.focus_view(self.views[x])
-                self.views[x].settings().set('tabs_extra_last_activated', time.time())
+                timestamp_view(self.views[x])
                 selected = True
                 break
         if fallback and not selected:
@@ -211,7 +250,7 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
             for v in reversed(self.last_activated):
                 if self.window.get_view_index(v[1])[1] != -1:
                     self.window.focus_view(v[1])
-                    v[1].settings().set('tabs_extra_last_activated', time.time())
+                    timestamp_view(v[1])
                     selected = True
                     break
 
@@ -320,6 +359,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
         Attach view and window info so we can focus the right view after close.
         """
 
+        view.settings().set("tabs_extra_is_closed", True)
         if not view.settings().get("tabs_extra_closing", False):
             TabsExtraListener.extra_command_call = True
             view.settings().set("tabs_extra_view_info", view.window().get_view_index(view))
@@ -360,7 +400,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
         """
 
         if not TabsExtraListener.extra_command_call:
-            view.settings().set('tabs_extra_last_activated', time.time())
+            timestamp_view(view)
 
     def select_last(self, views, window, closed_index, fallback=True):
         """
@@ -376,7 +416,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
         last_activated.sort()
         if len(last_activated):
             window.focus_view(last_activated[-1][1])
-            last_activated[-1][1].settings().set('tabs_extra_last_activated', time.time())
+            timestamp_view(last_activated[-1][1])
             selected = True
         if not selected and fallback:
             selected = self.select_left(views, window, closed_index, False)
@@ -392,7 +432,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
         selected = False
         if len(views) > closed_index:
             window.focus_view(views[closed_index])
-            views[closed_index].settings().set('tabs_extra_last_activated', time.time())
+            timestamp_view(views[closed_index])
             selected = True
         if not selected and fallback:
             selected = self.select_left(views, window, closed_index, False)
@@ -406,7 +446,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
         selected = False
         if len(views) >= closed_index:
             window.focus_view(views[closed_index - 1])
-            views[closed_index - 1].settings().set('tabs_extra_last_activated', time.time())
+            timestamp_view(views[closed_index - 1])
             selected = True
         if not selected and fallback:
             selected = self.select_right(views, window, closed_index, False)
@@ -479,3 +519,11 @@ class TabsExtraInstallMenuCommand(sublime_plugin.ApplicationCommand):
         """
 
         tab_menu.upgrade_default_menu()
+
+
+def plugin_loaded():
+    win = sublime.active_window()
+    if win is not None:
+        view = win.active_view()
+        if view is not None:
+            timestamp_view(view)
