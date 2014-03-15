@@ -11,7 +11,7 @@ Sublime Plugin with sticky tabs and more tab closing options.  ST3 is the only s
 - Adds `Sticky Tabs` that allows a user select certain tabs that will not close when a tab close command is issued.
 - Adds variants of the close commands to skip unsaved files, or to dismiss saved files with no prompt
 - Overrides the built-in tab commands and 'close' and 'close_all' commands to work with sticky tabs (ST3 only)
-- Keep active window focus on delete, or default to left or right tab (user configurable)
+- Keep active window focus on delete, or default to the last active, left, or right tab (user configurable)
 - Add open last tab, reveal in sidebar or finder, copy file path, save options, and revert
 
 # Which Commands does TabsExtra Override?
