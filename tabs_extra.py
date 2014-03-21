@@ -72,11 +72,16 @@ def timestamp_view(view):
 
     global LAST_ACTIVE
 
+    # Detect if this focus is due to the last active tab being moved
     if (
         LAST_ACTIVE is not None and
         not LAST_ACTIVE.settings().get("tabs_extra_is_closed", False) and
         LAST_ACTIVE.window() is None
     ):
+        # Flag last active tab as being moved
+        window = view.window()
+        active_group, active_index = window.get_view_index(view)
+        LAST_ACTIVE.settings().set("tabs_extra_moving", [window.id(), active_group])
         # Skip if moving a tab
         LAST_ACTIVE = None
         allow = False
@@ -84,7 +89,12 @@ def timestamp_view(view):
         allow = True
 
     if allow:
+        window = view.window()
+        active_group, active_index = window.get_view_index(view)
+        # Add time stamp of last activation
         view.settings().set('tabs_extra_last_activated', time.time())
+        # Track the tabs last postion to help with focusing after a tab is moved
+        view.settings().set('tabs_extra_last_activated_view_index', active_index)
         LAST_ACTIVE = view
         debug("activated - %s" % view.file_name())
     else:
@@ -380,27 +390,65 @@ class TabsExtraListener(sublime_plugin.EventListener):
                     window = w
                     break
             if window is not None:
-                views = window.views_in_group(int(view_info[0]))
-                fallback_mode = get_fallback_direction()
-                selected = False
-                if len(views) == 0:
-                    return
-                if view_info[1] >= 0:
-                    if fallback_mode == LAST:
-                        self.select_last(views, window, view_info[1])
-                    elif fallback_mode == RIGHT:
-                        self.select_right(views, window, view_info[1])
-                    else:
-                        self.select_left(views, window, view_info[1])
+                self.select_tab(w, int(view_info[0]), view_info[1])
             TabsExtraListener.extra_command_call = False
 
     def on_activated(self, view):
         """
         Timestamp each view when activated.
+        Detect if on_move event should be executed.
         """
 
         if not TabsExtraListener.extra_command_call:
             timestamp_view(view)
+
+        # Detect if tab was moved to a new group
+        # Run on_move event if it has.
+        moving = view.settings().get("tabs_extra_moving", None)
+        if moving is not None:
+            win_id, group_id = moving
+            window = view.window()
+            active_group, active_index = window.get_view_index(view)
+            if window.id() != win_id or int(group_id) != int(active_group):
+                view.settings().erase("tabs_extra_moving")
+                last_index = view.settings().get('tabs_extra_last_activated_view_index', -1)
+                self.on_move(view, win_id, int(group_id), last_index)
+
+    def on_move(self, view, win_id, group_id, last_index):
+        """
+        If a tab move to a new group was detected,
+        selecte the fallback tab in the group it was moved from.
+        """
+
+        current_view = view
+        selected = False
+        for w in sublime.windows():
+            if w.id() == win_id:
+                selected = self.select_tab(w, group_id, last_index)
+                break
+        if selected:
+            window = view.window()
+            if window is not None:
+                window.focus_view(view)
+
+    def select_tab(self, window, group_id, last_index):
+        """
+        Select the desired fallback tab
+        """
+
+        selected = False
+        views = window.views_in_group(group_id)
+        fallback_mode = get_fallback_direction()
+        if len(views) == 0:
+            return
+        if last_index >= 0:
+            if fallback_mode == LAST:
+                selected = self.select_last(views, window, last_index)
+            elif fallback_mode == RIGHT:
+                selected = self.select_right(views, window, last_index)
+            else:
+                selected = self.select_left(views, window, last_index)
+        return selected
 
     def select_last(self, views, window, closed_index, fallback=True):
         """
