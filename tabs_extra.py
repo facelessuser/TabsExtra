@@ -253,7 +253,7 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
         """
 
         selected = False
-        self.last_activated.sort()
+        self.last_activated = sorted(self.last_activated, key=lambda x: x[0])
 
         if len(self.last_activated):
             # Get most recent activated tab
@@ -461,7 +461,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
             last = v.settings().get("tabs_extra_last_activated", None)
             if last is not None:
                 last_activated.append((last, v))
-        last_activated.sort()
+        last_activated = sorted(last_activated, key=lambda x: x[0])
         if len(last_activated):
             window.focus_view(last_activated[-1][1])
             timestamp_view(last_activated[-1][1])
