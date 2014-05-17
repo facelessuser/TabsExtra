@@ -7,7 +7,7 @@ License: MIT
 import sublime
 import sublime_plugin
 from os.path import join, exists
-from os import makedirs, remove, rename
+from os import makedirs, remove
 import json
 from .lib.file_strip.json import sanitize_json
 import codecs
@@ -231,7 +231,6 @@ def plugin_loaded():
         makedirs(menu_path)
         upgrade_default_menu()
         return
-    menu = join(menu_path, TAB_MENU)
     version_file = join(menu_path, VERSION_FILE)
     upgrade = False
     if not exists(version_file):

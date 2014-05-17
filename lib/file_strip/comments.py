@@ -88,7 +88,7 @@ class Comments(object):
 
     @classmethod
     def add_style(cls, style, fn):
-        if not style in cls.__dict__:
+        if style not in cls.__dict__:
             setattr(cls, style, fn)
             cls.styles.append(style)
 

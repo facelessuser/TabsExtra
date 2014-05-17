@@ -31,6 +31,7 @@ You do this at your own risk.  If something goes wrong, you may need to manually
 Are you sure you want to continue?
 '''
 
+
 def log(msg, status=False):
     string = str(msg)
     print("TabsExtra: %s" % string)
@@ -246,7 +247,6 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
             selected = self.select_right(False)
         return selected
 
-
     def select_last(self, fallback=True):
         """
         Select last activated tab if available.
@@ -284,11 +284,12 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
                 self.window.focus_view(self.views[self.active_index])
                 selected = True
             elif fallback_mode == LAST:
-                self.select_last()
+                selected = self.select_last()
             elif fallback_mode == RIGHT:
-                self.select_right()
+                selected = self.select_right()
             else:
-                self.select_left()
+                selected = self.select_left()
+        return selected
 
     def run(
         self, group=-1, index=-1,
@@ -420,7 +421,6 @@ class TabsExtraListener(sublime_plugin.EventListener):
         selecte the fallback tab in the group it was moved from.
         """
 
-        current_view = view
         selected = False
         for w in sublime.windows():
             if w.id() == win_id:
@@ -548,6 +548,7 @@ class TabsExtraInstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
         msg = OVERRIDE_CONFIRM
         if sublime.ok_cancel_dialog(msg):
             tab_menu.upgrade_override_menu()
+
 
 class TabsExtraUninstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
     def run(self):

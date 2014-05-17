@@ -21,12 +21,12 @@ JSON_PATTERN = re.compile(
                 ,                        # trailing comma
                 (?P<square_ws>[\s\r\n]*) # white space
                 (?P<square_bracket>\])   # bracket
-            )  
+            )
           | (?P<curly_comma>
                 ,                        # trailing comma
                 (?P<curly_ws>[\s\r\n]*)  # white space
                 (?P<curly_bracket>\})    # bracket
-            )  
+            )
         )
       | (?P<code>
             "(?:\\.|[^"\\])*"            # double quoted string
