@@ -373,8 +373,10 @@ class TabsExtraListener(sublime_plugin.EventListener):
         view.settings().set("tabs_extra_is_closed", True)
         if not view.settings().get("tabs_extra_closing", False):
             TabsExtraListener.extra_command_call = True
-            view.settings().set("tabs_extra_view_info", view.window().get_view_index(view))
-            view.settings().set("tabs_extra_window_info", view.window().id())
+            window = view.window()
+            if window is not None:
+                view.settings().set("tabs_extra_view_info", view.window().get_view_index(view))
+                view.settings().set("tabs_extra_window_info", view.window().id())
 
     def on_close(self, view):
         """
