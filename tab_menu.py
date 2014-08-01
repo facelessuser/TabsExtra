@@ -12,7 +12,7 @@ import json
 from .lib.file_strip.json import sanitize_json
 import codecs
 
-__format__ = "1.1.0"
+__format__ = "1.1.1"
 __changes__ = [
     "Check menu formats and prompt for upgrades.",
     "Add close options that can skip unsaved files or dismiss unsaved files without a prompt.",
@@ -124,6 +124,7 @@ OVERRIDE_OPEN_OPTIONS = '''    { "command": "new_file", "caption": "New File" },
 
 MENU_MAP = {
     "close": CLOSE_OPTIONS,
+    "clone": CLONE_OPTIONS,
     "sticky": STICKY_OPTIONS,
     "open": OPEN_OPTIONS,
     "save": SAVE_OPTIONS,
