@@ -12,7 +12,7 @@ import json
 from .lib.file_strip.json import sanitize_json
 import codecs
 
-__format__ = "1.1.1"
+__format__ = "1.2.1"
 __changes__ = [
     "Check menu formats and prompt for upgrades.",
     "Add close options that can skip unsaved files or dismiss unsaved files without a prompt.",
@@ -111,6 +111,12 @@ PATH_OPTIONS = '''    { "caption": "-" },
 REVERT_OPTIONS = '''    { "caption": "-" },
     { "command": "tabs_extra_revert", "args": {"group": -1, "index": -1, "command": "revert"}, "caption": "Revert File" }'''
 
+DELETE_OPTIONS = '''    { "caption": "-" },
+    { "command": "tabs_extra_delete", "args": {"group": -1, "index": -1}, "caption": "Delete File" }'''
+
+RENAME_OPTIONS = '''    { "caption": "-" },
+    { "command": "tabs_extra_rename", "args": {"group": -1, "index": -1}, "caption": "Rename…" }'''
+
 ###############################
 # Override Menu Options
 ###############################
@@ -123,14 +129,16 @@ OVERRIDE_OPEN_OPTIONS = '''    { "command": "new_file", "caption": "New File" },
 
 
 MENU_MAP = {
-    "close": CLOSE_OPTIONS,
     "clone": CLONE_OPTIONS,
-    "sticky": STICKY_OPTIONS,
+    "close": CLOSE_OPTIONS,
+    "delete": DELETE_OPTIONS,
     "open": OPEN_OPTIONS,
-    "save": SAVE_OPTIONS,
-    "reveal": REVEAL_OPTIONS,
     "path": PATH_OPTIONS,
-    "revert": REVERT_OPTIONS
+    "rename": RENAME_OPTIONS,
+    "reveal": REVEAL_OPTIONS,
+    "revert": REVERT_OPTIONS,
+    "save": SAVE_OPTIONS,
+    "sticky": STICKY_OPTIONS
 }
 
 OVERRIDE_MAP = {
@@ -157,7 +165,7 @@ def get_menu(override=False):
     Return the formatted tab menu.
     """
 
-    default_layout = ["close", "sticky", "open", "clone", "save", "reveal", "path", "revert"]
+    default_layout = ["close", "sticky", "open", "clone", "save", "delete", "rename", "reveal", "path", "revert"]
     layout = sublime.load_settings("tabs_extra.sublime-settings").get("menu_layout", default_layout)
     entries = []
     for entry in layout:

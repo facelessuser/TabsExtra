@@ -8,8 +8,8 @@
     "fallback_focus": "right",
 
     // Menu layout include or exclude, in whatever order you desire, the following options:
-    // ["close", "sticky", "open", "clone", "save", "reveal", "path", "revert"]
+    // ["close", "sticky", "open", "clone", "save", "delete", "rename", "reveal", "path", "revert"]
     // When done, go to Preferences->Package Settings->TabsExtra and Install/Upgrade either
     // the default TabsMenu or the Override Menu which overrides the "Default" package's menu.
-    "menu_layout": ["close", "sticky", "open", "clone", "save", "reveal", "path", "revert"]
+    "menu_layout": ["close", "sticky", "open", "clone", "save", "delete", "rename", "reveal", "path", "revert"]
 }

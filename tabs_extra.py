@@ -8,6 +8,9 @@ import sublime_plugin
 import sublime
 import time
 from . import tab_menu
+from os.path import exists, split, splitext, join
+from os import rename
+import functools
 
 SETTINGS = "tabs_extra.sublime-settings"
 
@@ -512,6 +515,66 @@ class TabsExtraViewWrapperCommand(sublime_plugin.WindowCommand):
         if group >= 0 or index >= 0:
             self.window.focus_view(self.window.views_in_group(int(group))[index])
             self.window.run_command(command, args)
+
+
+class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
+    def run(self, group=-1, index=-1):
+        if group >= 0 or index >= 0:
+            view = self.window.views_in_group(int(group))[index]
+            if view is not None:
+                file_name = view.file_name()
+                if file_name is not None and exists(file_name):
+                    if sublime.ok_cancel_dialog("Delete File?", "Delete"):
+                        if not view.close():
+                            return
+                        import Default.send2trash as send2trash
+                        send2trash.send2trash(file_name)
+
+    def is_visible(self, group=-1, index=-1):
+        enabled = False
+        if group >= 0 or index >= 0:
+            view = self.window.views_in_group(int(group))[index]
+            if view.file_name() is not None and exists(view.file_name()):
+                enabled = True
+        return enabled
+
+
+class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
+    def run(self, group=-1, index=-1):
+        if group >= 0 or index >= 0:
+            view = self.window.views_in_group(int(group))[index]
+            if view is not None:
+                file_name = view.file_name()
+                if file_name is not None and exists(file_name):
+                    branch, leaf = split(file_name)
+                    v = self.window.show_input_panel(
+                        "New Name:", leaf,
+                        functools.partial(self.on_done, file_name, branch),
+                        None, None
+                    )
+                    name, ext = splitext(leaf)
+                    v.sel().clear()
+                    v.sel().add(sublime.Region(0, len(name)))
+
+    def on_done(self, old, branch, leaf):
+        new = join(branch, leaf)
+
+        try:
+            rename(old, new)
+
+            v = self.window.find_open_file(old)
+            if v:
+                v.retarget(new)
+        except:
+            sublime.status_message("Unable to rename")
+
+    def is_visible(self, group=-1, index=-1):
+        enabled = False
+        if group >= 0 or index >= 0:
+            view = self.window.views_in_group(int(group))[index]
+            if view.file_name() is not None and exists(view.file_name()):
+                enabled = True
+        return enabled
 
 
 class TabsExtraRevertCommand(TabsExtraViewWrapperCommand):
