@@ -524,7 +524,7 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
             if view is not None:
                 file_name = view.file_name()
                 if file_name is not None and exists(file_name):
-                    if sublime.ok_cancel_dialog("Delete File?", "Delete"):
+                    if sublime.ok_cancel_dialog("Delete %s?" % file_name, "Delete"):
                         if not view.close():
                             return
                         import Default.send2trash as send2trash
