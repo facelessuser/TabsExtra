@@ -12,7 +12,7 @@ import json
 from .lib.file_strip.json import sanitize_json
 import codecs
 
-__format__ = "1.2.1"
+__format__ = "1.3.0"
 __changes__ = [
     "Check menu formats and prompt for upgrades.",
     "Add close options that can skip unsaved files or dismiss unsaved files without a prompt.",
@@ -117,6 +117,17 @@ DELETE_OPTIONS = '''    { "caption": "-" },
 RENAME_OPTIONS = '''    { "caption": "-" },
     { "command": "tabs_extra_rename", "args": {"group": -1, "index": -1}, "caption": "Rename…" }'''
 
+SORT_OPTIONS = '''    { "caption": "-" },
+    {
+        "caption": "Sort Tabs By…",
+        "children":
+        [
+%(entries)s
+        ]
+    }'''
+
+SORT_ENTRY = '            { "command": "tabs_extra_sort", "args": {"group": -1, "sort_by": "%(sort_by)s", "reverse": %(reverse)s}, "caption": "%(caption)s" }'
+
 ###############################
 # Override Menu Options
 ###############################
@@ -138,6 +149,7 @@ MENU_MAP = {
     "reveal": REVEAL_OPTIONS,
     "revert": REVERT_OPTIONS,
     "save": SAVE_OPTIONS,
+    "sort": SORT_OPTIONS,
     "sticky": STICKY_OPTIONS
 }
 
@@ -165,15 +177,30 @@ def get_menu(override=False):
     Return the formatted tab menu.
     """
 
-    default_layout = ["close", "sticky", "open", "clone", "save", "delete", "rename", "reveal", "path", "revert"]
-    layout = sublime.load_settings("tabs_extra.sublime-settings").get("menu_layout", default_layout)
+    default_layout = ["close", "sticky", "open", "clone", "save", "delete", "rename", "reveal", "path", "revert", "sort"]
+    layout = sublime.load_settings(SETTINGS).get("menu_layout", default_layout)
     entries = []
     for entry in layout:
         if entry in MENU_MAP:
             if entry in OVERRIDE_MAP:
                 entries.append(MENU_MAP[entry] % {"override": OVERRIDE_MAP[entry] if override else ''})
                 continue
-            entries.append(MENU_MAP[entry])
+            if entry == "sort":
+                sort_layout = sublime.load_settings(SETTINGS).get("sort_layout", [])
+                if len(sort_layout):
+                    sort_entries = []
+                    for sort_entry in sort_layout:
+                        sort_entries.append(
+                            SORT_ENTRY % {
+                                "sort_by": sort_entry.get("module", ""),
+                                "caption": sort_entry.get("caption", ""),
+                                "reverse": str(bool(sort_entry.get("reverse", False))).lower()
+                            }
+                        )
+                    item = MENU_MAP[entry] % {"entries": ',\n'.join(sort_entries)}
+            else:
+                item = MENU_MAP[entry]
+            entries.append(item)
 
     return "[\n%s\n]\n" % (',\n'.join(entries))
 

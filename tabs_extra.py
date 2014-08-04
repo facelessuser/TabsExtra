@@ -7,10 +7,12 @@ License: MIT
 import sublime_plugin
 import sublime
 import time
+import sys
 from . import tab_menu
-from os.path import exists, split, splitext, join
+from os.path import exists, split, splitext, join, normpath
 from os import rename
 import functools
+from operator import itemgetter
 
 SETTINGS = "tabs_extra.sublime-settings"
 
@@ -45,6 +47,18 @@ def log(msg, status=False):
 def debug(s):
     if sublime.load_settings(SETTINGS).get("debug", False):
         log(s)
+
+
+def sublime_format_path(pth):
+    """
+    Format path for sublime
+    """
+
+    import re
+    m = re.match(r"^([A-Za-z]{1}):(?:/|\\)(.*)", pth)
+    if sublime.platform() == "windows" and m is not None:
+        pth = m.group(1) + "/" + m.group(2)
+    return pth.replace("\\", "/")
 
 
 def is_persistent():
@@ -519,6 +533,10 @@ class TabsExtraViewWrapperCommand(sublime_plugin.WindowCommand):
 
 class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
     def run(self, group=-1, index=-1):
+        """
+        Delete the tab's file
+        """
+
         if group >= 0 or index >= 0:
             view = self.window.views_in_group(int(group))[index]
             if view is not None:
@@ -539,8 +557,61 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
         return enabled
 
 
+class TabsExtraSortCommand(sublime_plugin.WindowCommand):
+    def run(self, group=-1, sort_by=None, reverse=False):
+        """
+        Sort Tabs
+        """
+
+        if sort_by is not None:
+            self.group = group
+            self.reverse = reverse
+            views = self.window.views_in_group(int(group))
+            if len(views):
+                sort_module = self.get_sort_module(sort_by)
+                if sort_module is not None:
+                    view_data = []
+                    sort_module.run(views, view_data)
+                    self.sort(view_data)
+
+    def sort(self, view_data):
+        """
+        Sort the views
+        """
+
+        indexes = tuple([x for x in range(0, len(view_data[0]) - 1)])
+        sorted_views = sorted(view_data, key=itemgetter(*indexes))
+        if self.reverse:
+            sorted_views = sorted_views[::-1]
+        for index in range(0, len(sorted_views)):
+            self.window.set_view_index(sorted_views[index][-1], self.group, index)
+
+    def get_sort_module(self, module_name):
+        """
+        Import the sort_by module
+        """
+
+        import imp
+        path_name = join("Packages", normpath(module_name.replace('.', '/')))
+        path_name += ".py"
+        module = imp.new_module(module_name)
+        sys.modules[module_name] = module
+        exec(
+            compile(
+                sublime.load_resource(sublime_format_path(path_name)),
+                module_name, 'exec'
+            ),
+            sys.modules[module_name].__dict__
+        )
+        return module
+
+
 class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
     def run(self, group=-1, index=-1):
+        """
+        Rename the given tab
+        """
+
         if group >= 0 or index >= 0:
             view = self.window.views_in_group(int(group))[index]
             if view is not None:

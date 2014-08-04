@@ -2,7 +2,7 @@ TabsExtra
 =========
 <img src="https://dl.dropboxusercontent.com/u/342698/TabsExtra/Menu.png" border="0"/>
 
-Sublime Plugin with sticky tabs and more tab closing options.  ST3 is the only supported platform.
+Sublime Plugin with sticky tabs, more tab closing options, tab sorting, and tab access to cloning, deleting, renaming etc.  ST3 is the only supported platform.
 
 # Features
 
@@ -13,6 +13,8 @@ Sublime Plugin with sticky tabs and more tab closing options.  ST3 is the only s
 - Overrides the built-in tab commands and 'close' and 'close_all' commands to work with sticky tabs (ST3 only)
 - Keep active window focus on delete, or default to the last active, left, or right tab (user configurable)
 - Add open last tab, reveal in sidebar or finder, copy file path, save options, and revert
+- Adds tab sorting options (based loosely on @bizoo's [SortTabs](https://github.com/bizoo/SortTabs) plugin)
+- Access clone, delete, rename, save, reveal, copy file path, revert, etc.
 
 # Which Commands does TabsExtra Override?
 TabsExtra does **not** override `close_file`, but it does override the following:
@@ -42,14 +44,43 @@ By default TabsExtra keeps the current active tab focused, but if the active tab
 ```
 
 # Customize Tab Context Menu
-The tab menu adds a number of times.  Each item group and be re-ordered, or excluded if desired via the settings file.
+The tab menu adds a number of times.  Each item group can be re-ordered, or excluded if desired via the settings file.
 
 ```javascript
     // Menu layout include or exclude, in whatever order you desire, the following options:
-    // ["close", "sticky", "open", "clone", "save", "reveal", "path", "revert"]
+    // ["close", "sticky", "open", "clone", "save", "delete", "rename", "reveal", "path", "revert", "sort"]
     // When done, go to Preferences->Package Settings->TabsExtra and Install/Upgrade either
     // the default TabsMenu or the Override Menu which overrides the "Default" package's menu.
-    "menu_layout": ["close", "sticky", "open", "clone", "save", "reveal", "path", "revert"]
+    "menu_layout": ["close", "sticky", "open", "clone", "save", "delete", "rename", "reveal", "path", "revert", "sort"],
+```
+
+Sort options are also configurable:
+
+```javascript
+    // Define sort layout.  Each entry contains:
+    //    "module": plugin that defines what view meta data is used to sort
+    //    "caption": menu name for entry
+    //    "reverse": (optional) sort tabs in the reverse (true|false)
+    "sort_layout": [
+        {"module": "TabsExtra.sort.name", "caption": "Name"},
+        {"module": "TabsExtra.sort.path", "caption": "Path"},
+        {"module": "TabsExtra.sort.modified", "caption": "Modified"},
+        {"module": "TabsExtra.sort.created", "caption": "Created"},
+        {"module": "TabsExtra.sort.type", "caption": "Extension"},
+        {"module": "TabsExtra.sort.size", "caption": "Size"},
+        {"module": "TabsExtra.sort.activated", "caption": "Last Activated"},
+        {"module": "TabsExtra.sort.syntax", "caption": "Syntax"},
+        {"module": "TabsExtra.sort.reverse", "caption": "Reverse Order"}
+    ],
+
+    // When sorting, normal strings will be sorted numerically.
+    //
+    // Example (non-numerical sort):
+    //   test12 test2 test1 => test1 test12 test2
+    //
+    // Example (numerical sort):
+    //   test12 test2 test1 => test1 test2 test12
+    "numeric_sort": false
 ```
 
 # Tab Context Menu Options
