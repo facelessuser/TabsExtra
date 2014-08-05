@@ -47,7 +47,7 @@ if _PLATFORM == "osx":
         rv = stat64(pth.encode("utf-8"), pointer(buf))
         if rv != 0:
             raise OSError("Couldn't stat file %r" % pth)
-        return buf.st_birthtimespec.tv_sec
+        return float("%d.%d" % (buf.st_birthtimespec.tv_sec, buf.st_birthtimespec.tv_nsec))
 
 else:
     from os.path import getctime as get_creation_time
