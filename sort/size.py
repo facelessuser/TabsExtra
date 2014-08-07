@@ -27,6 +27,8 @@ def run(views, view_data):
             if encoding == "Undefined":
                 encoding = "utf_8"
             size = len(v.substr(sublime.Region(0, v.size())).encode(encoding))
+            if v.line_endings() == 'Windows':
+                size += v.rowcol(v.size())[0]
         view_data.append(
             (
                 size,
