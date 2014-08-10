@@ -12,12 +12,10 @@ import json
 from .lib.file_strip.json import sanitize_json
 import codecs
 
-__format__ = "1.3.0"
+__format__ = "1.4.0"
 __changes__ = [
-    "Check menu formats and prompt for upgrades.",
-    "Add close options that can skip unsaved files or dismiss unsaved files without a prompt.",
-    "Add save, reveal, file path, reopen tabs, and revert options to tab menu."
-    "Allow reordering or excluding items from the tab menu via the settings file."
+    "Fix indexing for when image preview tabs are open.",
+    "Rename TabExtra and TabExtraAll to TabExtraClose and TabExtraCloseAll"
 ]
 
 PACKAGE_NAME = "TabsExtra"
@@ -60,28 +58,28 @@ Changes:
 ###############################
 CLOSE_OPTIONS = '''    { "caption": "-"},
 %(override)s
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "left" }, "caption": "Close Tabs to the Left" },
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "all" }, "caption": "Close All Tabs" },
+    { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "left" }, "caption": "Close Tabs to the Left" },
+    { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "all" }, "caption": "Close All Tabs" },
     {
         "caption": "Close Tabs(s) - Skip Unsaved",
         "children":
         [
-            { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "single", "close_unsaved": false }, "caption": "Close" },
-            { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "other", "close_unsaved": false }, "caption": "Close Other Tabs" },
-            { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "right", "close_unsaved": false }, "caption": "Close Tabs to the Right" },
-            { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "left", "close_unsaved": false }, "caption": "Close Tabs to the Left" },
-            { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "all", "close_unsaved": false }, "caption": "Close All Tabs" }
+            { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "single", "close_unsaved": false }, "caption": "Close" },
+            { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "other", "close_unsaved": false }, "caption": "Close Other Tabs" },
+            { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "right", "close_unsaved": false }, "caption": "Close Tabs to the Right" },
+            { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "left", "close_unsaved": false }, "caption": "Close Tabs to the Left" },
+            { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "all", "close_unsaved": false }, "caption": "Close All Tabs" }
         ]
     },
     {
         "caption": "Close Tabs(s) - Dismiss Unsaved",
         "children":
         [
-            { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "single", "unsaved_prompt": false }, "caption": "Close" },
-            { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "other", "unsaved_prompt": false }, "caption": "Close Other Tabs" },
-            { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "right", "unsaved_prompt": false }, "caption": "Close Tabs to the Right" },
-            { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "left", "unsaved_prompt": false }, "caption": "Close Tabs to the Left" },
-            { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "all", "unsaved_prompt": false }, "caption": "Close All Tabs" }
+            { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "single", "unsaved_prompt": false }, "caption": "Close" },
+            { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "other", "unsaved_prompt": false }, "caption": "Close Other Tabs" },
+            { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "right", "unsaved_prompt": false }, "caption": "Close Tabs to the Right" },
+            { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "left", "unsaved_prompt": false }, "caption": "Close Tabs to the Left" },
+            { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "all", "unsaved_prompt": false }, "caption": "Close All Tabs" }
         ]
     }'''
 
@@ -131,9 +129,9 @@ SORT_ENTRY = '            { "command": "tabs_extra_sort", "args": {"group": -1, 
 ###############################
 # Override Menu Options
 ###############################
-OVERRIDE_CLOSE_OPTIONS = '''    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "single" }, "caption": "Close" },
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "other" }, "caption": "Close Other Tabs" },
-    { "command": "tabs_extra", "args": { "group": -1, "index": -1, "close_type": "right" }, "caption": "Close Tabs to the Right" },'''
+OVERRIDE_CLOSE_OPTIONS = '''    { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "single" }, "caption": "Close" },
+    { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "other" }, "caption": "Close Other Tabs" },
+    { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "right" }, "caption": "Close Tabs to the Right" },'''
 
 OVERRIDE_OPEN_OPTIONS = '''    { "command": "new_file", "caption": "New File" },
     { "command": "prompt_open_file", "caption": "Open File" },'''

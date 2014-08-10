@@ -83,12 +83,15 @@ def get_fallback_direction():
     return mode
 
 
-def timestamp_view(view):
+def timestamp_view(window, sheet):
     """
     Timestamp view.
     """
 
     global LAST_ACTIVE
+    view = window.active_view()
+    if view is None:
+        return
 
     # Detect if this focus is due to the last active tab being moved
     if (
@@ -98,7 +101,7 @@ def timestamp_view(view):
     ):
         # Flag last active tab as being moved
         window = view.window()
-        active_group, active_index = window.get_view_index(view)
+        active_group, active_index = window.get_sheet_index(sheet)
         LAST_ACTIVE.settings().set("tabs_extra_moving", [window.id(), active_group])
         # Skip if moving a tab
         LAST_ACTIVE = None
@@ -108,15 +111,42 @@ def timestamp_view(view):
 
     if allow:
         window = view.window()
-        active_group, active_index = window.get_view_index(view)
+        active_group, active_index = window.get_sheet_index(sheet)
         # Add time stamp of last activation
         view.settings().set('tabs_extra_last_activated', time.time())
         # Track the tabs last postion to help with focusing after a tab is moved
-        view.settings().set('tabs_extra_last_activated_view_index', active_index)
+        view.settings().set('tabs_extra_last_activated_sheet_index', active_index)
         LAST_ACTIVE = view
         debug("activated - %s" % view.file_name())
     else:
         debug("skipping - %s" % view.file_name())
+
+
+def get_group_view(window, group, index):
+    """
+    Get the view at the given index in the given group.
+    """
+
+    active_sheet = window.active_sheet()
+    protect_focus = False
+    if TabsExtraListener.extra_command_call is False:
+        TabsExtraListener.extra_command_call = True
+        protect_focus = True
+    sheets = window.sheets_in_group(int(group))
+    if index < len(sheets):
+        sheet = sheets[index]
+    else:
+        sheet = None
+    if sheet is not None:
+        window.focus_sheet(sheet)
+        view = window.active_view()
+
+    window.focus_sheet(active_sheet)
+
+    if protect_focus:
+        TabsExtraListener.extra_command_call = False
+
+    return view
 
 
 class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
@@ -153,11 +183,12 @@ class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
         """
 
         if group >= 0 or index >= 0:
-            view = self.window.views_in_group(int(group))[index]
-            if not view.settings().get("tabs_extra_sticky", False):
-                view.settings().set("tabs_extra_sticky", True)
-            else:
-                view.settings().erase("tabs_extra_sticky")
+            view = get_group_view(self.window, group, index)
+            if view is not None:
+                if not view.settings().get("tabs_extra_sticky", False):
+                    view.settings().set("tabs_extra_sticky", True)
+                else:
+                    view.settings().erase("tabs_extra_sticky")
 
     def is_checked(self, group=-1, index=-1):
         """
@@ -166,24 +197,26 @@ class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
 
         checked = False
         if group >= 0 or index >= 0:
-            checked = self.window.views_in_group(int(group))[index].settings().get("tabs_extra_sticky", False)
+            view = get_group_view(self.window, group, index)
+            if view is not None:
+                checked = view.settings().get("tabs_extra_sticky", False)
         return checked
 
 
-class TabsExtraAllCommand(sublime_plugin.WindowCommand):
+class TabsExtraCloseAllCommand(sublime_plugin.WindowCommand):
     def run(self):
         """
         Close all tabs in window; not just the tabs in the active group.
         """
 
         for group in range(0, self.window.num_groups()):
-            view = self.window.active_view_in_group(group)
-            if view is not None:
-                index = self.window.get_view_index(view)[1]
-                self.window.run_command("tabs_extra", {"close_type": "all", "group": group, "index": index})
+            sheet = self.window.active_sheet_in_group(group)
+            if sheet is not None:
+                index = self.window.get_sheet_index(sheet)[1]
+                self.window.run_command("tabs_extra_close", {"close_type": "all", "group": group, "index": index})
 
 
-class TabsExtraCommand(sublime_plugin.WindowCommand):
+class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
     def init(self, close_type, group, index):
         """
         Determine which views will be targeted by close command.
@@ -191,16 +224,16 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
         """
 
         self.persistent = is_persistent()
-        self.views = self.window.views_in_group(int(group))
+        self.sheets = self.window.sheets_in_group(int(group))
         assert(close_type in ["single", "left", "right", "other", "all"])
 
         # Setup active index and group
-        active_view = self.window.active_view()
+        active_sheet = self.window.active_sheet()
         active_index = None
         self.active_index = index
         self.active_group = None
-        if active_view is not None:
-            active_group, active_index = self.window.get_view_index(active_view)
+        if active_sheet is not None:
+            active_group, active_index = self.window.get_sheet_index(active_sheet)
             if group != active_group:
                 active_index = None
         if active_index is not None:
@@ -208,26 +241,31 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
 
         # Compile a list of existing tabs with their timestamps
         self.last_activated = []
-        for v in self.views:
-            last_activated = v.settings().get("tabs_extra_last_activated", None)
-            if last_activated is not None:
-                self.last_activated.append((last_activated, v))
+        for s in self.sheets:
+            self.window.focus_sheet(s)
+            v = self.window.active_view()
+            if v is not None:
+                last_activated = v.settings().get("tabs_extra_last_activated", None)
+                if last_activated is not None:
+                    self.last_activated.append((last_activated, s))
+            else:
+                self.last_activated.append((0, s))
 
-        # Determine targeted views to close and views to cleanup
+        # Determine targeted sheets to close and sheets to cleanup
         if close_type == "single":
-            self.targets = [self.views[index]]
-            self.cleanup = bool(len(self.views[:index] + self.views[index + 1:]))
+            self.targets = [self.sheets[index]]
+            self.cleanup = bool(len(self.sheets[:index] + self.sheets[index + 1:]))
         elif close_type == "left":
-            self.targets = self.views[:index]
-            self.cleanup = bool(len(self.views[index:]))
+            self.targets = self.sheets[:index]
+            self.cleanup = bool(len(self.sheets[index:]))
         elif close_type == "right":
-            self.targets = self.views[index + 1:]
-            self.cleanup = bool(len(self.views[:index + 1]))
+            self.targets = self.sheets[index + 1:]
+            self.cleanup = bool(len(self.sheets[:index + 1]))
         elif close_type == "other":
-            self.targets = self.views[:index] + self.views[index + 1:]
+            self.targets = self.sheets[:index] + self.sheets[index + 1:]
             self.cleanup = True
         elif close_type == "all":
-            self.targets = self.views[:]
+            self.targets = self.sheets[:]
             self.cleanup = False
 
     def select_left(self, fallback=True):
@@ -237,9 +275,9 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
 
         selected = False
         for x in reversed(range(0, self.active_index)):
-            if self.window.get_view_index(self.views[x])[1] != -1:
-                self.window.focus_view(self.views[x])
-                timestamp_view(self.views[x])
+            if self.window.get_sheet_index(self.sheets[x])[1] != -1:
+                self.window.focus_sheet(self.sheets[x])
+                timestamp_view(self.window, self.sheets[x])
                 selected = True
                 break
         if fallback and not selected:
@@ -253,10 +291,10 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
         """
 
         selected = False
-        for x in range(self.active_index + 1, len(self.views)):
-            if self.window.get_view_index(self.views[x])[1] != -1:
-                self.window.focus_view(self.views[x])
-                timestamp_view(self.views[x])
+        for x in range(self.active_index + 1, len(self.sheets)):
+            if self.window.get_sheet_index(self.sheets[x])[1] != -1:
+                self.window.focus_sheet(self.sheets[x])
+                timestamp_view(self.window, self.sheets[x])
                 selected = True
                 break
         if fallback and not selected:
@@ -274,10 +312,10 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
 
         if len(self.last_activated):
             # Get most recent activated tab
-            for v in reversed(self.last_activated):
-                if self.window.get_view_index(v[1])[1] != -1:
-                    self.window.focus_view(v[1])
-                    timestamp_view(v[1])
+            for s in reversed(self.last_activated):
+                if self.window.get_sheet_index(s[1])[1] != -1:
+                    self.window.focus_sheet(s[1])
+                    timestamp_view(self.window, s[1])
                     selected = True
                     break
 
@@ -297,8 +335,8 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
         selected = False
         if self.active_index is not None:
             fallback_mode = get_fallback_direction()
-            if self.window.get_view_index(self.views[self.active_index])[1] != -1:
-                self.window.focus_view(self.views[self.active_index])
+            if self.window.get_sheet_index(self.sheets[self.active_index])[1] != -1:
+                self.window.focus_sheet(self.sheets[self.active_index])
                 selected = True
             elif fallback_mode == LAST:
                 selected = self.select_last()
@@ -321,17 +359,22 @@ class TabsExtraCommand(sublime_plugin.WindowCommand):
         if group >= 0 or index >= 0:
             self.init(close_type, group, index)
 
-            for v in self.targets:
-                if not v.settings().get("tabs_extra_sticky", False) or close_type == "single":
-                    if not self.persistent:
+            for s in self.targets:
+                self.window.focus_sheet(s)
+                v = self.window.active_view()
+                if v is not None:
+                    if not v.settings().get("tabs_extra_sticky", False) or close_type == "single":
+                        if not self.persistent:
+                            v.settings().erase("tabs_extra_sticky")
+                        self.window.focus_view(v)
+                        if not v.is_dirty() or close_unsaved:
+                            if v.is_dirty() and not unsaved_prompt:
+                                v.set_scratch(True)
+                            self.window.run_command("close_file")
+                    elif not self.persistent:
                         v.settings().erase("tabs_extra_sticky")
-                    self.window.focus_view(v)
-                    if not v.is_dirty() or close_unsaved:
-                        if v.is_dirty() and not unsaved_prompt:
-                            v.set_scratch(True)
-                        self.window.run_command("close_file")
-                elif not self.persistent:
-                    v.settings().erase("tabs_extra_sticky")
+                else:
+                    self.window.run_command("close_file")
 
             if not self.persistent and self.cleanup:
                 self.window.run_command("tabs_extra_clear_all_sticky", {"group": group})
@@ -364,19 +407,19 @@ class TabsExtraListener(sublime_plugin.EventListener):
             group, index = window.get_view_index(view)
             args = {"group": group, "index": index}
         if command_name in ["close_by_index", "close"]:
-            command_name = "tabs_extra"
+            command_name = "tabs_extra_close"
             args["close_type"] = "single"
             cmd = (command_name, args)
         elif command_name == "close_all":
-            command_name = "tabs_extra_all"
+            command_name = "tabs_extra_close_all"
             args = {}
             cmd = (command_name, args)
         elif command_name == "close_others_by_index":
-            command_name = "tabs_extra"
+            command_name = "tabs_extra_close"
             args["close_type"] = "other"
             cmd = (command_name, args)
         elif command_name == "close_to_right_by_index":
-            command_name = "tabs_extra"
+            command_name = "tabs_extra_close"
             args["close_type"] = "right"
             cmd = (command_name, args)
         return cmd
@@ -420,7 +463,8 @@ class TabsExtraListener(sublime_plugin.EventListener):
         """
 
         if not TabsExtraListener.extra_command_call:
-            timestamp_view(view)
+            s = view.window().active_sheet()
+            timestamp_view(view.window(), s)
 
         # Detect if tab was moved to a new group
         # Run on_move event if it has.
@@ -431,13 +475,13 @@ class TabsExtraListener(sublime_plugin.EventListener):
             active_group, active_index = window.get_view_index(view)
             if window.id() != win_id or int(group_id) != int(active_group):
                 view.settings().erase("tabs_extra_moving")
-                last_index = view.settings().get('tabs_extra_last_activated_view_index', -1)
+                last_index = view.settings().get('tabs_extra_last_activated_sheet_index', -1)
                 self.on_move(view, win_id, int(group_id), last_index)
 
     def on_move(self, view, win_id, group_id, last_index):
         """
         If a tab move to a new group was detected,
-        selecte the fallback tab in the group it was moved from.
+        select the fallback tab in the group it was moved from.
         """
 
         selected = False
@@ -456,67 +500,72 @@ class TabsExtraListener(sublime_plugin.EventListener):
         """
 
         selected = False
-        views = window.views_in_group(group_id)
+        sheets = window.sheets_in_group(group_id)
         fallback_mode = get_fallback_direction()
-        if len(views) == 0:
+        if len(sheets) == 0:
             return
         if last_index >= 0:
             if fallback_mode == LAST:
-                selected = self.select_last(views, window, last_index)
+                selected = self.select_last(sheets, window, last_index)
             elif fallback_mode == RIGHT:
-                selected = self.select_right(views, window, last_index)
+                selected = self.select_right(sheets, window, last_index)
             else:
-                selected = self.select_left(views, window, last_index)
+                selected = self.select_left(sheets, window, last_index)
         return selected
 
-    def select_last(self, views, window, closed_index, fallback=True):
+    def select_last(self, sheets, window, closed_index, fallback=True):
         """
         Focus last active view.
         """
 
         selected = False
         last_activated = []
-        for v in views:
-            last = v.settings().get("tabs_extra_last_activated", None)
-            if last is not None:
-                last_activated.append((last, v))
+        for s in sheets:
+            window.focus_sheet(s)
+            v = window.active_view()
+            if v is not None:
+                last = v.settings().get("tabs_extra_last_activated", None)
+                if last is not None:
+                    last_activated.append((last, s))
+            else:
+                last_activated.append((0, s))
         last_activated = sorted(last_activated, key=lambda x: x[0])
         if len(last_activated):
-            window.focus_view(last_activated[-1][1])
-            timestamp_view(last_activated[-1][1])
+            window.focus_sheet(last_activated[-1][1])
+            timestamp_view(window, last_activated[-1][1])
             selected = True
         if not selected and fallback:
-            selected = self.select_left(views, window, closed_index, False)
+            selected = self.select_left(sheets, window, closed_index, False)
         if not selected and fallback:
-            selected = self.select_right(views, window, closed_index, False)
+            selected = self.select_right(sheets, window, closed_index, False)
         return selected
 
-    def select_right(self, views, window, closed_index, fallback=True):
+    def select_right(self, sheets, window, closed_index, fallback=True):
         """
         Focus view to the right of closed view.
         """
 
         selected = False
-        if len(views) > closed_index:
-            window.focus_view(views[closed_index])
-            timestamp_view(views[closed_index])
+        if len(sheets) > closed_index:
+            window.focus_sheet(sheets[closed_index])
+            timestamp_view(window, sheets[closed_index])
             selected = True
         if not selected and fallback:
-            selected = self.select_left(views, window, closed_index, False)
+            selected = self.select_left(sheets, window, closed_index, False)
         return selected
 
-    def select_left(self, views, window, closed_index, fallback=True):
+    def select_left(self, sheets, window, closed_index, fallback=True):
         """
         Focus view to the left of closed view.
         """
 
         selected = False
-        if len(views) >= closed_index:
-            window.focus_view(views[closed_index - 1])
-            timestamp_view(views[closed_index - 1])
+        if len(sheets) >= closed_index:
+            window.focus_sheet(sheets[closed_index - 1])
+            timestamp_view(window, sheets[closed_index - 1])
             selected = True
         if not selected and fallback:
-            selected = self.select_right(views, window, closed_index, False)
+            selected = self.select_right(sheets, window, closed_index, False)
         return selected
 
 
@@ -527,8 +576,10 @@ class TabsExtraViewWrapperCommand(sublime_plugin.WindowCommand):
         """
 
         if group >= 0 or index >= 0:
-            self.window.focus_view(self.window.views_in_group(int(group))[index])
-            self.window.run_command(command, args)
+            view = get_group_view(self.window, group, index)
+            if view is not None:
+                self.window.focus_view(view)
+                self.window.run_command(command, args)
 
 
 class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
@@ -538,7 +589,7 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
         """
 
         if group >= 0 or index >= 0:
-            view = self.window.views_in_group(int(group))[index]
+            view = get_group_view(self.window, group, index)
             if view is not None:
                 file_name = view.file_name()
                 if file_name is not None and exists(file_name):
@@ -551,8 +602,8 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
     def is_visible(self, group=-1, index=-1):
         enabled = False
         if group >= 0 or index >= 0:
-            view = self.window.views_in_group(int(group))[index]
-            if view.file_name() is not None and exists(view.file_name()):
+            view = get_group_view(self.window, group, index)
+            if view is not None and view.file_name() is not None and exists(view.file_name()):
                 enabled = True
         return enabled
 
@@ -613,7 +664,7 @@ class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
         """
 
         if group >= 0 or index >= 0:
-            view = self.window.views_in_group(int(group))[index]
+            view = get_group_view(self.window, group, index)
             if view is not None:
                 file_name = view.file_name()
                 if file_name is not None and exists(file_name):
@@ -642,8 +693,8 @@ class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
     def is_visible(self, group=-1, index=-1):
         enabled = False
         if group >= 0 or index >= 0:
-            view = self.window.views_in_group(int(group))[index]
-            if view.file_name() is not None and exists(view.file_name()):
+            view = get_group_view(self.window, group, index)
+            if view is not None and view.file_name() is not None and exists(view.file_name()):
                 enabled = True
         return enabled
 
@@ -656,8 +707,8 @@ class TabsExtraRevertCommand(TabsExtraViewWrapperCommand):
 
         enabled = False
         if group >= 0 or index >= 0:
-            view = self.window.views_in_group(int(group))[index]
-            if view.file_name() is not None:
+            view = get_group_view(self.window, group, index)
+            if view is not None and view.file_name() is not None:
                 enabled = view.is_dirty()
         return enabled
 
@@ -670,8 +721,9 @@ class TabsExtraFileCommand(TabsExtraViewWrapperCommand):
 
         enabled = False
         if group >= 0 or index >= 0:
-            view = self.window.views_in_group(int(group))[index]
-            enabled = view.file_name() is not None
+            view = get_group_view(self.window, group, index)
+            if view is not None:
+                enabled = view.file_name() is not None
         return enabled
 
 
@@ -709,6 +761,6 @@ class TabsExtraInstallMenuCommand(sublime_plugin.ApplicationCommand):
 def plugin_loaded():
     win = sublime.active_window()
     if win is not None:
-        view = win.active_view()
-        if view is not None:
-            timestamp_view(view)
+        sheet = win.active_sheet()
+        if sheet is not None:
+            timestamp_view(win, sheet)
