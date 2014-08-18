@@ -241,15 +241,16 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
 
         # Compile a list of existing tabs with their timestamps
         self.last_activated = []
-        for s in self.sheets:
-            self.window.focus_sheet(s)
-            v = self.window.active_view()
-            if v is not None:
-                last_activated = v.settings().get("tabs_extra_last_activated", None)
-                if last_activated is not None:
-                    self.last_activated.append((last_activated, s))
-            else:
-                self.last_activated.append((0, s))
+        if get_fallback_direction() == LAST:
+            for s in self.sheets:
+                self.window.focus_sheet(s)
+                v = self.window.active_view()
+                if v is not None:
+                    last_activated = v.settings().get("tabs_extra_last_activated", None)
+                    if last_activated is not None:
+                        self.last_activated.append((last_activated, s))
+                else:
+                    self.last_activated.append((0, s))
 
         # Determine targeted sheets to close and sheets to cleanup
         if close_type == "single":
