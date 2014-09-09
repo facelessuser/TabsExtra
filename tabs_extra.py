@@ -609,6 +609,30 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
         return enabled
 
 
+class TabsExtraSortMenuCommand(sublime_plugin.WindowCommand):
+    def run(self):
+        """ Using "sort_layout" setting, construct a quick panel sort menu """
+        sort_layout = sublime.load_settings(SETTINGS).get("sort_layout", [])
+        if len(sort_layout):
+            self.sort_commands = []
+            sort_menu = []
+            for sort_entry in sort_layout:
+                caption = str(sort_entry.get("caption", ""))
+                module = str(sort_entry.get("module", ""))
+                reverse = bool(sort_entry.get("reverse", False))
+                if module != "":
+                    self.sort_commands.append((module, reverse))
+                    sort_menu.append(caption)
+            if len(sort_menu):
+                self.window.show_quick_panel(sort_menu, self.check_selection)
+
+    def check_selection(self, value):
+        """ Launch the selected sort command """
+        if value != -1:
+            command = self.sort_commands[value]
+            self.window.run_command("tabs_extra_sort", {"sort_by": command[0], "reverse": command[1]})
+
+
 class TabsExtraSortCommand(sublime_plugin.WindowCommand):
     def run(self, group=-1, sort_by=None, reverse=False):
         """

@@ -1,0 +1,6 @@
+[
+    {
+        "caption": "TabsExtra: Sort Tabs",
+        "command": "tabs_extra_sort_menu"
+    }
+]
