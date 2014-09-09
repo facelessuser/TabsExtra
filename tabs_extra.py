@@ -616,6 +616,8 @@ class TabsExtraSortCommand(sublime_plugin.WindowCommand):
         """
 
         if sort_by is not None:
+            if group == -1:
+                group = self.window.active_group()
             self.group = group
             self.reverse = reverse
             views = self.window.views_in_group(int(group))
