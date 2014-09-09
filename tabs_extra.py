@@ -37,6 +37,9 @@ Are you sure you want to continue?
 '''
 
 
+###############################
+# Helpers
+###############################
 def log(msg, status=False):
     string = str(msg)
     print("TabsExtra: %s" % string)
@@ -149,6 +152,9 @@ def get_group_view(window, group, index):
     return view
 
 
+###############################
+# Sticky Tabs
+###############################
 class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
     def run(self, group=-1, force=False):
         """
@@ -203,6 +209,9 @@ class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
         return checked
 
 
+###############################
+# Close
+###############################
 class TabsExtraCloseAllCommand(sublime_plugin.WindowCommand):
     def run(self):
         """
@@ -384,7 +393,9 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
 
         TabsExtraListener.extra_command_call = False
 
-
+###############################
+# Listener
+###############################
 class TabsExtraListener(sublime_plugin.EventListener):
     extra_command_call = False
 
@@ -570,6 +581,9 @@ class TabsExtraListener(sublime_plugin.EventListener):
         return selected
 
 
+###############################
+# Wrappers
+###############################
 class TabsExtraViewWrapperCommand(sublime_plugin.WindowCommand):
     def run(self, command, group=-1, index=-1, args={}):
         """
@@ -583,6 +597,9 @@ class TabsExtraViewWrapperCommand(sublime_plugin.WindowCommand):
                 self.window.run_command(command, args)
 
 
+###############################
+# File Management Commands
+###############################
 class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
     def run(self, group=-1, index=-1):
         """
@@ -608,7 +625,79 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
                 enabled = True
         return enabled
 
+class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
+    def run(self, group=-1, index=-1):
+        """
+        Rename the given tab
+        """
 
+        if group >= 0 or index >= 0:
+            view = get_group_view(self.window, group, index)
+            if view is not None:
+                file_name = view.file_name()
+                if file_name is not None and exists(file_name):
+                    branch, leaf = split(file_name)
+                    v = self.window.show_input_panel(
+                        "New Name:", leaf,
+                        functools.partial(self.on_done, file_name, branch),
+                        None, None
+                    )
+                    name, ext = splitext(leaf)
+                    v.sel().clear()
+                    v.sel().add(sublime.Region(0, len(name)))
+
+    def on_done(self, old, branch, leaf):
+        new = join(branch, leaf)
+
+        try:
+            rename(old, new)
+
+            v = self.window.find_open_file(old)
+            if v:
+                v.retarget(new)
+        except:
+            sublime.status_message("Unable to rename")
+
+    def is_visible(self, group=-1, index=-1):
+        enabled = False
+        if group >= 0 or index >= 0:
+            view = get_group_view(self.window, group, index)
+            if view is not None and view.file_name() is not None and exists(view.file_name()):
+                enabled = True
+        return enabled
+
+
+class TabsExtraRevertCommand(TabsExtraViewWrapperCommand):
+    def is_visible(self, command, group=-1, index=-1, args={}):
+        """
+        Determine if command should be visible in menu.
+        """
+
+        enabled = False
+        if group >= 0 or index >= 0:
+            view = get_group_view(self.window, group, index)
+            if view is not None and view.file_name() is not None:
+                enabled = view.is_dirty()
+        return enabled
+
+
+class TabsExtraFileCommand(TabsExtraViewWrapperCommand):
+    def is_enabled(self, command, group=-1, index=-1, args={}):
+        """
+        Determine if command should be enabled.
+        """
+
+        enabled = False
+        if group >= 0 or index >= 0:
+            view = get_group_view(self.window, group, index)
+            if view is not None:
+                enabled = view.file_name() is not None
+        return enabled
+
+
+###############################
+# Sort
+###############################
 class TabsExtraSortMenuCommand(sublime_plugin.WindowCommand):
     def run(self):
         """ Using "sort_layout" setting, construct a quick panel sort menu """
@@ -684,76 +773,9 @@ class TabsExtraSortCommand(sublime_plugin.WindowCommand):
         return module
 
 
-class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
-    def run(self, group=-1, index=-1):
-        """
-        Rename the given tab
-        """
-
-        if group >= 0 or index >= 0:
-            view = get_group_view(self.window, group, index)
-            if view is not None:
-                file_name = view.file_name()
-                if file_name is not None and exists(file_name):
-                    branch, leaf = split(file_name)
-                    v = self.window.show_input_panel(
-                        "New Name:", leaf,
-                        functools.partial(self.on_done, file_name, branch),
-                        None, None
-                    )
-                    name, ext = splitext(leaf)
-                    v.sel().clear()
-                    v.sel().add(sublime.Region(0, len(name)))
-
-    def on_done(self, old, branch, leaf):
-        new = join(branch, leaf)
-
-        try:
-            rename(old, new)
-
-            v = self.window.find_open_file(old)
-            if v:
-                v.retarget(new)
-        except:
-            sublime.status_message("Unable to rename")
-
-    def is_visible(self, group=-1, index=-1):
-        enabled = False
-        if group >= 0 or index >= 0:
-            view = get_group_view(self.window, group, index)
-            if view is not None and view.file_name() is not None and exists(view.file_name()):
-                enabled = True
-        return enabled
-
-
-class TabsExtraRevertCommand(TabsExtraViewWrapperCommand):
-    def is_visible(self, command, group=-1, index=-1, args={}):
-        """
-        Determine if command should be visible in menu.
-        """
-
-        enabled = False
-        if group >= 0 or index >= 0:
-            view = get_group_view(self.window, group, index)
-            if view is not None and view.file_name() is not None:
-                enabled = view.is_dirty()
-        return enabled
-
-
-class TabsExtraFileCommand(TabsExtraViewWrapperCommand):
-    def is_enabled(self, command, group=-1, index=-1, args={}):
-        """
-        Determine if command should be enabled.
-        """
-
-        enabled = False
-        if group >= 0 or index >= 0:
-            view = get_group_view(self.window, group, index)
-            if view is not None:
-                enabled = view.file_name() is not None
-        return enabled
-
-
+###############################
+# Menu Installation
+###############################
 class TabsExtraInstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
     def run(self):
         """
@@ -785,6 +807,9 @@ class TabsExtraInstallMenuCommand(sublime_plugin.ApplicationCommand):
         tab_menu.upgrade_default_menu()
 
 
+###############################
+# Plugin Loading
+###############################
 def plugin_loaded():
     win = sublime.active_window()
     if win is not None:
