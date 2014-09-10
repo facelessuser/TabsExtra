@@ -236,6 +236,57 @@ class TabsExtraSetStickyCommand(sublime_plugin.TextCommand):
 ###############################
 # Close
 ###############################
+class TabsExtraCloseMenuCommand(sublime_plugin.WindowCommand):
+    close_types = [
+        ("Close", "single"),
+        ("Close Other Tabs", "other"),
+        ("Close Tabs to Right", "right"),
+        ("Close Tabs to Left", "left"),
+        ("Close All Tabs", "all")
+    ]
+
+    def run(self, mode="normal"):
+        self.mode = mode
+        self.group = -1
+        self.index = -1
+        sheet = self.window.active_sheet()
+        if sheet is not None:
+            self.group, self.index = self.window.get_sheet_index(sheet)
+        if self.group != -1 and self.index != -1:
+            self.window.show_quick_panel(
+                [x[0] for x in self.close_types],
+                self.check_selection
+            )
+
+    def check_selection(self, value):
+        if value != -1:
+            close_unsaved = True
+            unsaved_prompt = True
+            if self.mode == "skip_unsaved":
+                close_unsaved = False
+            if self.mode == "dismiss_unsaved":
+                unsaved_prompt = False
+            close_type = self.close_types[value][1]
+            self.window.run_command(
+                "tabs_extra_close",
+                {
+                    "group": int(self.group),
+                    "index": int(self.index),
+                    "close_type": close_type,
+                    "unsaved_prompt": unsaved_prompt,
+                    "close_unsaved": close_unsaved
+                }
+            )
+
+    def is_enabled(self, mode="normal"):
+        group = -1
+        index = -1
+        sheet = self.window.active_sheet()
+        if sheet is not None:
+            group, index = self.window.get_sheet_index(sheet)
+        return group != -1 and index != -1 and mode in ["normal", "skip_unsaved", "dismiss_unsaved"]
+
+
 class TabsExtraCloseAllCommand(sublime_plugin.WindowCommand):
     def run(self):
         """

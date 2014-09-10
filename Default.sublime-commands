@@ -16,5 +16,20 @@
     {
         "caption": "TabsExtra: Clear All Sticky Tabs",
         "command": "tabs_extra_clear_all_sticky"
+    },
+    {
+        "caption": "TabsExtra: Close Tabs",
+        "command": "tabs_extra_close_menu",
+        "args": {"mode": "normal"}
+    },
+    {
+        "caption": "TabsExtra: Close Tabs (Skip Unsaved)",
+        "command": "tabs_extra_close_menu",
+        "args": {"mode": "skip_unsaved"}
+    },
+    {
+        "caption": "TabsExtra: Close Tabs (Dismiss Unsaved)",
+        "command": "tabs_extra_close_menu",
+        "args": {"mode": "dismiss_unsaved"}
     }
 ]
