@@ -161,6 +161,9 @@ class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
         Clear all tab sticky states of current active group.
         """
 
+        if group == -1:
+            group = self.window.active_group()
+
         if group >= 0:
             persistent = is_persistent()
             views = self.window.views_in_group(int(group))
@@ -172,6 +175,9 @@ class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
         """
         Show command if any tabs in active group are sticky.
         """
+
+        if group == -1:
+            group = self.window.active_group()
 
         marked = False
         views = self.window.views_in_group(int(group))
@@ -207,6 +213,24 @@ class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
             if view is not None:
                 checked = view.settings().get("tabs_extra_sticky", False)
         return checked
+
+
+class TabsExtraSetStickyCommand(sublime_plugin.TextCommand):
+    def run(self, edit, value):
+        """ Set the sticky command to the specific value """
+
+        if self.is_enabled(value):
+            self.view.settings().set("tabs_extra_sticky", bool(value))
+
+    def is_enabled(self, value):
+        """ Check if sticky value is already set to desired value """
+
+        enabled = False
+        if self.view is not None:
+            current_value = self.view.settings().get("tabs_extra_sticky", False)
+            if current_value != value:
+                enabled = True
+        return enabled
 
 
 ###############################

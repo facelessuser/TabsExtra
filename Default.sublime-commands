@@ -2,5 +2,19 @@
     {
         "caption": "TabsExtra: Sort Tabs",
         "command": "tabs_extra_sort_menu"
+    },
+    {
+        "caption": "TabsExtra: Sticky Tab",
+        "command": "tabs_extra_set_sticky",
+        "args": {"value": true}
+    },
+    {
+        "caption": "TabsExtra: Unsticky Tab",
+        "command": "tabs_extra_set_sticky",
+        "args": {"value": false}
+    },
+    {
+        "caption": "TabsExtra: Clear All Sticky Tabs",
+        "command": "tabs_extra_clear_all_sticky"
     }
 ]
