@@ -6,8 +6,8 @@ def run(views, view_data):
     for v in views:
         view_data.append(
             (
-                tsh.numberic_sort(v.settings().get('syntax', '')),
-                tsh.numberic_sort(basename(v.file_name() if v.file_name() else '').lower()),
+                tsh.numeric_sort(v.settings().get('syntax', '')),
+                tsh.numeric_sort(basename(v.file_name() if v.file_name() else '').lower()),
                 v
             )
         )
