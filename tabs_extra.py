@@ -815,6 +815,7 @@ class TabsExtraSortCommand(sublime_plugin.WindowCommand):
                     view_data = []
                     sort_module.run(views, view_data)
                     self.sort(view_data)
+                    self.window.focus_view(self.window.active_view())
 
     def sort(self, view_data):
         """
