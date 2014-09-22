@@ -441,7 +441,7 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
 
         TabsExtraListener.extra_command_call = True
 
-        if group >= 0 or index >= 0:
+        if group >= 0 and index >= 0:
             self.init(close_type, group, index)
 
             for s in self.targets:
