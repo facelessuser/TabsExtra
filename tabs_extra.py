@@ -550,8 +550,11 @@ class TabsExtraListener(sublime_plugin.EventListener):
         """
 
         if not TabsExtraListener.extra_command_call:
-            s = view.window().active_sheet()
-            timestamp_view(view.window(), s)
+            window = view.window()
+            if window is None:
+                return
+            s = window.active_sheet()
+            timestamp_view(window, s)
 
         # Detect if tab was moved to a new group
         # Run on_move event if it has.
@@ -559,6 +562,8 @@ class TabsExtraListener(sublime_plugin.EventListener):
         if moving is not None:
             win_id, group_id = moving
             window = view.window()
+            if window is None:
+                return
             active_group, active_index = window.get_view_index(view)
             if window.id() != win_id or int(group_id) != int(active_group):
                 view.settings().erase("tabs_extra_moving")
