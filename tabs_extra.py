@@ -72,6 +72,11 @@ def is_persistent():
     return sublime.load_settings(SETTINGS).get("persistent_sticky", False)
 
 
+def sort_on_save():
+    """ Sort on save """
+    return sublime.load_settings(SETTINGS).get("sort_on_load_save", False)
+
+
 def get_fallback_direction():
     """
     Get the focused tab fallback direction.
@@ -468,6 +473,7 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
 
         TabsExtraListener.extra_command_call = False
 
+
 ###############################
 # Listener
 ###############################
@@ -510,6 +516,27 @@ class TabsExtraListener(sublime_plugin.EventListener):
             args["close_type"] = "right"
             cmd = (command_name, args)
         return cmd
+
+    def on_load(self, view):
+        if sort_on_save():
+            if not self.on_sort(view):
+                view.settings().set('tabsextra_to_sort', True)
+
+    def on_post_save(self, view):
+        if sort_on_save():
+            self.on_sort(view)
+
+    def on_sort(self, view):
+        if view.window() and view.window().get_view_index(view)[1] != -1:
+            cmd = sublime.load_settings(SETTINGS).get("sort_on_load_save_command", {})
+            module = str(cmd.get("module", ""))
+            reverse = bool(cmd.get("reverse", False))
+            if module != "":
+                view.window().run_command(
+                    "tabs_extra_sort",
+                    {"sort_by": module, "reverse": reverse}
+                )
+            return True
 
     def on_pre_close(self, view):
         """
@@ -569,6 +596,9 @@ class TabsExtraListener(sublime_plugin.EventListener):
                 view.settings().erase("tabs_extra_moving")
                 last_index = view.settings().get('tabs_extra_last_activated_sheet_index', -1)
                 self.on_move(view, win_id, int(group_id), last_index)
+        elif sort_on_save() and view.settings().get('tabsextra_to_sort'):
+            view.settings().erase('tabsextra_to_sort')
+            self.on_sort(view)
 
     def on_move(self, view, win_id, group_id, last_index):
         """
