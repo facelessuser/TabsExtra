@@ -735,6 +735,7 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
                 enabled = True
         return enabled
 
+
 class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
     def run(self, group=-1, index=-1):
         """
