@@ -521,6 +521,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
         if sort_on_save():
             if not self.on_sort(view):
                 view.settings().set('tabsextra_to_sort', True)
+        view.window().focus_view(view)
 
     def on_post_save(self, view):
         if sort_on_save():
@@ -558,9 +559,15 @@ class TabsExtraListener(sublime_plugin.EventListener):
         focus the correct view in window group.
         """
 
+        window = view.window()
+        if window is not None:
+            # On close window shouldn't have a view
+            # This is possibly a preview
+            window.focus_view(view)
+            return
+
         view_info = view.settings().get("tabs_extra_view_info", None)
         window_info = view.settings().get("tabs_extra_window_info", None)
-        window = None
         if view_info is not None and window_info is not None:
             for w in sublime.windows():
                 if w.id() == window_info:
@@ -599,6 +606,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
         elif sort_on_save() and view.settings().get('tabsextra_to_sort'):
             view.settings().erase('tabsextra_to_sort')
             self.on_sort(view)
+        view.window().focus_view(view)
 
     def on_move(self, view, win_id, group_id, last_index):
         """
