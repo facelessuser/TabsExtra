@@ -250,7 +250,7 @@ class TabsExtraCloseMenuCommand(sublime_plugin.WindowCommand):
         ("Close All Tabs", "all")
     ]
 
-    def run(self, mode="normal"):
+    def run(self, mode="normal", close_type=None):
         self.mode = mode
         self.group = -1
         self.index = -1
@@ -258,10 +258,20 @@ class TabsExtraCloseMenuCommand(sublime_plugin.WindowCommand):
         if sheet is not None:
             self.group, self.index = self.window.get_sheet_index(sheet)
         if self.group != -1 and self.index != -1:
-            self.window.show_quick_panel(
-                [x[0] for x in self.close_types],
-                self.check_selection
-            )
+            value = None
+            if close_type is not None:
+                index = 0
+                for ct in self.close_types:
+                    if ct[1] == close_type:
+                        value = index
+                    index += 1
+            if value is None:
+                self.window.show_quick_panel(
+                    [x[0] for x in self.close_types],
+                    self.check_selection
+                )
+            else:
+                self.check_selection(value)
 
     def check_selection(self, value):
         if value != -1:
