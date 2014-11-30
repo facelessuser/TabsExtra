@@ -531,7 +531,9 @@ class TabsExtraListener(sublime_plugin.EventListener):
         if sort_on_save():
             if not self.on_sort(view):
                 view.settings().set('tabsextra_to_sort', True)
-        view.window().focus_view(view)
+        window = view.window()
+        if window is not None:
+            window.focus_view(view)
 
     def on_post_save(self, view):
         if sort_on_save():
@@ -568,7 +570,6 @@ class TabsExtraListener(sublime_plugin.EventListener):
         If close command was initiated outside of TabsExtra,
         focus the correct view in window group.
         """
-
         window = view.window()
         if window is not None:
             # On close window shouldn't have a view
@@ -616,7 +617,9 @@ class TabsExtraListener(sublime_plugin.EventListener):
         elif sort_on_save() and view.settings().get('tabsextra_to_sort'):
             view.settings().erase('tabsextra_to_sort')
             self.on_sort(view)
-        view.window().focus_view(view)
+        window = view.window()
+        if window is not None:
+            window.focus_view(view)
 
     def on_move(self, view, win_id, group_id, last_index):
         """
