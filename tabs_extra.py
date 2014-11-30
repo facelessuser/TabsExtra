@@ -579,16 +579,19 @@ class TabsExtraListener(sublime_plugin.EventListener):
             # This is possibly a preview
             win_id, group_num = window.id(), window.num_groups()
             if TabsExtraListener.group_capture is not None:
+                last_win_id = TabsExtraListener.group_capture[0]
+                last_group_num = TabsExtraListener.group_capture[1]
+                TabsExtraListener.group_capture = None
+
                 # If you are closing a group, don't try and focus
                 # The closing view(s)
-                if (
-                    win_id == TabsExtraListener.group_capture[0] and
-                    group_num < TabsExtraListener.group_capture[1]
-                ):
-                    TabsExtraListener.group_capture = None
+                if win_id == last_win_id and group_num < last_group_num:
                     return
             window.focus_view(view)
             return
+
+        if TabsExtraListener.group_capture is not None:
+            TabsExtraListener.group_capture = None
 
         view_info = view.settings().get("tabs_extra_view_info", None)
         window_info = view.settings().get("tabs_extra_window_info", None)
