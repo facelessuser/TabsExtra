@@ -489,6 +489,7 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
 ###############################
 class TabsExtraListener(sublime_plugin.EventListener):
     extra_command_call = False
+    group_capture = None
 
     def on_window_command(self, window, command_name, args):
         """
@@ -525,6 +526,8 @@ class TabsExtraListener(sublime_plugin.EventListener):
             command_name = "tabs_extra_close"
             args["close_type"] = "right"
             cmd = (command_name, args)
+        elif command_name == "set_layout":
+            TabsExtraListener.group_capture = (window.id(), window.num_groups())
         return cmd
 
     def on_load(self, view):
@@ -574,6 +577,16 @@ class TabsExtraListener(sublime_plugin.EventListener):
         if window is not None:
             # On close window shouldn't have a view
             # This is possibly a preview
+            win_id, group_num = window.id(), window.num_groups()
+            if TabsExtraListener.group_capture is not None:
+                # If you are closing a group, don't try and focus
+                # The closing view(s)
+                if (
+                    win_id == TabsExtraListener.group_capture[0] and
+                    group_num < TabsExtraListener.group_capture[1]
+                ):
+                    TabsExtraListener.group_capture = None
+                    return
             window.focus_view(view)
             return
 
