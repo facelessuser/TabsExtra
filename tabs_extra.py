@@ -9,7 +9,7 @@ import sublime
 import time
 import sys
 from . import tab_menu
-from os.path import exists, split, splitext, join, normpath
+from os.path import exists, split, splitext, join, normpath, basename, dirname, isdir
 from os import rename
 import functools
 from operator import itemgetter
@@ -199,7 +199,7 @@ class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
         Toggle a tabs sticky state.
         """
 
-        if group >= 0 or index >= 0:
+        if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
             if view is not None:
                 if not view.settings().get("tabs_extra_sticky", False):
@@ -213,7 +213,7 @@ class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
         """
 
         checked = False
-        if group >= 0 or index >= 0:
+        if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
             if view is not None:
                 checked = view.settings().get("tabs_extra_sticky", False)
@@ -718,7 +718,7 @@ class TabsExtraViewWrapperCommand(sublime_plugin.WindowCommand):
         Wrap command in order to ensure view gets focused first.
         """
 
-        if group >= 0 or index >= 0:
+        if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
             if view is not None:
                 self.window.focus_view(view)
@@ -734,7 +734,7 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
         Delete the tab's file
         """
 
-        if group >= 0 or index >= 0:
+        if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
             if view is not None:
                 file_name = view.file_name()
@@ -747,7 +747,58 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
 
     def is_visible(self, group=-1, index=-1):
         enabled = False
-        if group >= 0 or index >= 0:
+        if group >= 0 and index >= 0:
+            view = get_group_view(self.window, group, index)
+            if view is not None and view.file_name() is not None and exists(view.file_name()):
+                enabled = True
+        return enabled
+
+
+class TabsExtraDuplicateCommand(sublime_plugin.WindowCommand):
+    def run(self, group=-1, index=-1):
+        """
+        Rename the given tab
+        """
+
+        if group >= 0 and index >= 0:
+            view = get_group_view(self.window, group, index)
+            if view is not None:
+                file_name = view.file_name()
+                if file_name is not None and exists(file_name):
+                    branch, leaf = split(file_name)
+                    v = self.window.show_input_panel(
+                        "Duplicate:", file_name,
+                        lambda x: self.on_done(file_name, x),
+                        None, None
+                    )
+                    file_path_len = len(file_name)
+                    file_name_len = len(basename(file_name))
+                    v.sel().clear()
+                    v.sel().add(
+                        sublime.Region(
+                            file_path_len - file_name_len,
+                            file_path_len
+                        )
+                    )
+
+    def on_done(self, old, new):
+        new_path = dirname(new)
+        if exists(new_path) and isdir(new_path):
+            if not exists(new) or sublime.ok_cancel_dialog("Overwrite %s?" % new, "Replace"):
+                try:
+                    with open(old, 'rb') as f:
+                        text = f.read()
+
+                    with open(new, 'wb') as f:
+                        f.write(text)
+
+                    self.window.open_file(new)
+                except:
+                    sublime.status_message("Unable to duplicate")
+
+    def is_visible(self, group=-1, index=-1):
+        enabled = False
+        if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
             if view is not None and view.file_name() is not None and exists(view.file_name()):
                 enabled = True
@@ -760,7 +811,7 @@ class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
         Rename the given tab
         """
 
-        if group >= 0 or index >= 0:
+        if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
             if view is not None:
                 file_name = view.file_name()
@@ -789,7 +840,7 @@ class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
 
     def is_visible(self, group=-1, index=-1):
         enabled = False
-        if group >= 0 or index >= 0:
+        if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
             if view is not None and view.file_name() is not None and exists(view.file_name()):
                 enabled = True
@@ -803,7 +854,7 @@ class TabsExtraRevertCommand(TabsExtraViewWrapperCommand):
         """
 
         enabled = False
-        if group >= 0 or index >= 0:
+        if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
             if view is not None and view.file_name() is not None:
                 enabled = view.is_dirty()
@@ -817,7 +868,32 @@ class TabsExtraFileCommand(TabsExtraViewWrapperCommand):
         """
 
         enabled = False
-        if group >= 0 or index >= 0:
+        if group >= 0 and index >= 0:
+            view = get_group_view(self.window, group, index)
+            if view is not None:
+                enabled = view.file_name() is not None
+        return enabled
+
+
+class TabsExtraFilePathCommand(sublime_plugin.WindowCommand):
+    def run(self, group=-1, index=-1, path_type='path'):
+        if group >= 0 and index >= 0:
+            view = get_group_view(self.window, group, index)
+            if view is not None:
+                self.window.focus_view(view)
+                view.run_command('copy_path')
+                pth = sublime.get_clipboard()
+                if path_type == 'name':
+                    pth = basename(pth)
+                sublime.set_clipboard(pth)
+
+    def is_enabled(self, group=-1, index=-1, path_type='path'):
+        """
+        Determine if command should be enabled.
+        """
+
+        enabled = False
+        if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
             if view is not None:
                 enabled = view.file_name() is not None

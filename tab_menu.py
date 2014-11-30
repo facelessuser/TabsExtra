@@ -12,10 +12,9 @@ import json
 from .lib.file_strip.json import sanitize_json
 import codecs
 
-__format__ = "1.4.0"
+__format__ = "1.5.0"
 __changes__ = [
-    "Fix indexing for when image preview tabs are open.",
-    "Rename TabExtra and TabExtraAll to TabExtraClose and TabExtraCloseAll"
+    "Add 'Duplicate' and 'Copy File Name' command"
 ]
 
 PACKAGE_NAME = "TabsExtra"
@@ -103,8 +102,14 @@ REVEAL_OPTIONS = '''    { "caption": "-" },
     { "command": "tabs_extra_file", "args": {"group": -1, "index": -1, "command": "open_dir", "args": {"dir": "$file_path", "file": "$file_name"}}, "caption": "Open Containing Folder…" },
     { "command": "tabs_extra_file", "args": {"group": -1, "index": -1, "command": "reveal_in_side_bar"}, "caption": "Reveal in Side Bar" }'''
 
-PATH_OPTIONS = '''    { "caption": "-" },
-    { "command": "tabs_extra_file", "args": {"group": -1, "index": -1, "command": "copy_path"}, "caption": "Copy File Path" }'''
+PATH_OPTIONS = '''    {
+        "caption": "Copy File Path",
+        "children":
+        [
+            { "command": "tabs_extra_file_path", "args": {"group": -1, "index": -1, "path_type": "path"}, "caption": "Full Path" },
+            { "command": "tabs_extra_file_path", "args": {"group": -1, "index": -1, "path_type": "name"}, "caption": "File Name" }
+        ]
+    }'''
 
 REVERT_OPTIONS = '''    { "caption": "-" },
     { "command": "tabs_extra_revert", "args": {"group": -1, "index": -1, "command": "revert"}, "caption": "Revert File" }'''
@@ -113,7 +118,8 @@ DELETE_OPTIONS = '''    { "caption": "-" },
     { "command": "tabs_extra_delete", "args": {"group": -1, "index": -1}, "caption": "Delete File" }'''
 
 RENAME_OPTIONS = '''    { "caption": "-" },
-    { "command": "tabs_extra_rename", "args": {"group": -1, "index": -1}, "caption": "Rename…" }'''
+    { "command": "tabs_extra_rename", "args": {"group": -1, "index": -1}, "caption": "Rename…" },
+    { "command": "tabs_extra_duplicate", "args": {"group": -1, "index": -1}, "caption": "Duplicate…" }'''
 
 SORT_OPTIONS = '''    { "caption": "-" },
     {
