@@ -14,6 +14,8 @@ from os import rename
 import functools
 from operator import itemgetter
 
+SHEET_WORKAROUND = int(sublime.version()) < 3068
+
 SETTINGS = "tabs_extra.sublime-settings"
 
 LEFT = 0
@@ -135,7 +137,8 @@ def get_group_view(window, group, index):
     Get the view at the given index in the given group.
     """
 
-    active_sheet = window.active_sheet()
+    if SHEET_WORKAROUND:
+        active_sheet = window.active_sheet()
     protect_focus = False
     if TabsExtraListener.extra_command_call is False:
         TabsExtraListener.extra_command_call = True
@@ -146,10 +149,14 @@ def get_group_view(window, group, index):
     else:
         sheet = None
     if sheet is not None:
-        window.focus_sheet(sheet)
-        view = window.active_view()
+        if SHEET_WORKAROUND:
+            window.focus_sheet(sheet)
+            view = window.active_view()
+        else:
+            view = sheet.view()
 
-    window.focus_sheet(active_sheet)
+    if SHEET_WORKAROUND:
+        window.focus_sheet(active_sheet)
 
     if protect_focus:
         TabsExtraListener.extra_command_call = False
@@ -386,8 +393,11 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
         self.last_activated = []
         if get_fallback_direction() == LAST:
             for s in self.sheets:
-                self.window.focus_sheet(s)
-                v = self.window.active_view()
+                if SHEET_WORKAROUND:
+                    self.window.focus_sheet(s)
+                    v = self.window.active_view()
+                else:
+                    v = s.view()
                 if v is not None:
                     last_activated = v.settings().get("tabs_extra_last_activated", None)
                     if last_activated is not None:
@@ -501,8 +511,11 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
             self.init(close_type, group, index)
 
             for s in self.targets:
-                self.window.focus_sheet(s)
-                v = self.window.active_view()
+                if SHEET_WORKAROUND:
+                    self.window.focus_sheet(s)
+                    v = self.window.active_view()
+                else:
+                    v = s.view()
                 if v is not None:
                     if not v.settings().get("tabs_extra_sticky", False) or close_type == "single":
                         if not self.persistent:
@@ -692,8 +705,11 @@ class TabsExtraListener(sublime_plugin.EventListener):
         selected = False
         last_activated = []
         for s in sheets:
-            window.focus_sheet(s)
-            v = window.active_view()
+            if SHEET_WORKAROUND:
+                window.focus_sheet(s)
+                v = window.active_view()
+            else:
+                v = s.view()
             if v is not None:
                 last = v.settings().get("tabs_extra_last_activated", None)
                 if last is not None:
