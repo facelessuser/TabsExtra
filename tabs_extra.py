@@ -139,27 +139,23 @@ def get_group_view(window, group, index):
 
     if SHEET_WORKAROUND:
         active_sheet = window.active_sheet()
-    protect_focus = False
-    if TabsExtraListener.extra_command_call is False:
-        TabsExtraListener.extra_command_call = True
-        protect_focus = True
+        protect_focus = False
+        if TabsExtraListener.extra_command_call is False:
+            TabsExtraListener.extra_command_call = True
+            protect_focus = True
+
     sheets = window.sheets_in_group(int(group))
-    if index < len(sheets):
-        sheet = sheets[index]
-    else:
-        sheet = None
-    if sheet is not None:
-        if SHEET_WORKAROUND:
-            window.focus_sheet(sheet)
-            view = window.active_view()
-        else:
-            view = sheet.view()
+    sheet = sheets[index] if index < len(sheets) else None
 
     if SHEET_WORKAROUND:
+        if sheet is not None:
+            window.focus_sheet(sheet)
+            view = window.active_view()
         window.focus_sheet(active_sheet)
-
-    if protect_focus:
-        TabsExtraListener.extra_command_call = False
+        if protect_focus:
+            TabsExtraListener.extra_command_call = False
+    else:
+        view = sheet.view() if sheet is not None else None
 
     return view
 
