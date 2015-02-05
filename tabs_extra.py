@@ -80,9 +80,9 @@ def sort_on_load_save():
     return sublime.load_settings(SETTINGS).get("sort_on_load_save", False)
 
 
-def custom_focus_on_load():
-    """ Special focus on load """
-    return sublime.load_settings(SETTINGS).get("custom_focus_on_load", "right")
+def view_spawn_pos():
+    """ Where do new views get spawned """
+    return sublime.load_settings(SETTINGS).get("span_view", "active_right")
 
 
 def get_fallback_direction():
@@ -593,80 +593,83 @@ class TabsExtraListener(sublime_plugin.EventListener):
         return cmd
 
     def on_load(self, view):
+        """ Handle load focus or spawining """
         Focus.cancel()
+
         if sort_on_load_save():
             if not self.on_sort(view):
                 view.settings().set('tabsextra_to_sort', True)
         else:
             if CUSTOM_OPEN_FOCUS:
-                self.on_load_focus(view)
+                self.on_spawn(view)
 
-    def on_load_focus(self, view):
-        window = view.window()
-        if window is None:
-            return
+    def on_spawn(self, view):
+        """ When a new view is spawned, postion the view per user's preference. """
 
         global LAST_ACTIVE
-        loaded = view.settings().get("tabs_extra_load_flag", False)
-        print(loaded)
-        if not loaded:
-            sheet = window.active_sheet()
-            focus_type = custom_focus_on_load()
-            sheets = window.sheets()
-            group, index = window.get_sheet_index(sheet)
-            last_group = None
-            last_index = None
-            if LAST_ACTIVE is not None:
-                for s in sheets:
-                    print(LAST_ACTIVE.file_name())
-                    if LAST_ACTIVE.id() == s.view().id():
-                        last_group, last_index = window.get_sheet_index(s)
-                        break
-            active_in_range = (
-                last_group is not None and
-                last_index is not None and
-                last_group == group
-            )
-            print('-----')
-            print(group)
-            print(index)
-            print(active_in_range)
-            if focus_type == "right":
-                group, index = window.get_sheet_index(sheets[-1])
-                window.set_sheet_index(sheet, group, index)
-            elif focus_type == "left":
-                group, index = window.get_sheet_index(sheets[0])
-                window.set_sheet_index(sheet, group, index)
-            elif focus_type == "active_right" and active_in_range:
-                window.set_sheet_index(sheet, group, last_index + 1)
-            elif focus_type == "active_left" and active_in_range:
-                print("active_left")
-                window.set_sheet_index(sheet, group, last_index)
 
-            view.settings().set("tabs_extra_load_flag", True)
+        window = view.window()
+        if window and window.get_view_index(view)[1] != -1:
+
+            loaded = view.settings().get("tabs_extra_spawned", False)
+            if not loaded:
+                sheet = window.active_sheet()
+                spawn = view_spawn_pos()
+                sheets = window.sheets()
+                group, index = window.get_sheet_index(sheet)
+                last_group = None
+                last_index = None
+                if LAST_ACTIVE is not None:
+                    for s in sheets:
+                        print(LAST_ACTIVE.file_name())
+                        if LAST_ACTIVE.id() == s.view().id():
+                            last_group, last_index = window.get_sheet_index(s)
+                            break
+                active_in_range = (
+                    last_group is not None and
+                    last_index is not None and
+                    last_group == group
+                )
+                if spawn == "right":
+                    group, index = window.get_sheet_index(sheets[-1])
+                    window.set_sheet_index(sheet, group, index)
+                elif spawn == "left":
+                    group, index = window.get_sheet_index(sheets[0])
+                    window.set_sheet_index(sheet, group, index)
+                elif spawn == "active_right" and active_in_range:
+                    window.set_sheet_index(sheet, group, last_index + 1)
+                elif spawn == "active_left" and active_in_range:
+                    print("active_left")
+                    window.set_sheet_index(sheet, group, last_index)
+
+                view.settings().set("tabs_extra_spawned", True)
 
     def on_post_save(self, view):
+        """ On save sorting """
         if sort_on_load_save():
             self.on_sort(view)
 
     def on_sort(self, view):
-        if view.window() and view.window().get_view_index(view)[1] != -1:
+        """ Sort views """
+        sorted_views = False
+        window = view.window()
+        if window and window.get_view_index(view)[1] != -1:
             cmd = sublime.load_settings(SETTINGS).get("sort_on_load_save_command", {})
             module = str(cmd.get("module", ""))
             reverse = bool(cmd.get("reverse", False))
             if module != "":
-                view.window().run_command(
+                window.run_command(
                     "tabs_extra_sort",
                     {"sort_by": module, "reverse": reverse}
                 )
-            return True
+            sorted_views = True
+        return sorted_views
 
     def on_pre_close(self, view):
         """
         If a view is closing without being marked, we know it was done outside of TabsExtra.
         Attach view and window info so we can focus the right view after close.
         """
-
         Focus.cancel()
 
         view.settings().set("tabs_extra_is_closed", True)
