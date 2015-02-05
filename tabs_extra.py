@@ -506,6 +506,15 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
         if group >= 0 and index >= 0:
             self.init(close_type, group, index)
 
+            if (
+                len(self.targets) and
+                not unsaved_prompt and
+                not sublime.ok_cancel_dialog(
+                    "Are you sure you want to dismiss all targeted unsaved buffers?"
+                )
+            ):
+                return
+
             for s in self.targets:
                 if SHEET_WORKAROUND:
                     self.window.focus_sheet(s)
