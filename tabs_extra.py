@@ -15,6 +15,7 @@ import functools
 from operator import itemgetter
 
 SHEET_WORKAROUND = int(sublime.version()) < 3068
+CUSTOM_OPEN_FOCUS = int(sublime.version()) >= 3068
 
 SETTINGS = "tabs_extra.sublime-settings"
 
@@ -74,9 +75,14 @@ def is_persistent():
     return sublime.load_settings(SETTINGS).get("persistent_sticky", False)
 
 
-def sort_on_save():
+def sort_on_load_save():
     """ Sort on save """
     return sublime.load_settings(SETTINGS).get("sort_on_load_save", False)
+
+
+def custom_focus_on_load():
+    """ Special focus on load """
+    return sublime.load_settings(SETTINGS).get("custom_focus_on_load", "right")
 
 
 def get_fallback_direction():
@@ -588,12 +594,59 @@ class TabsExtraListener(sublime_plugin.EventListener):
 
     def on_load(self, view):
         Focus.cancel()
-        if sort_on_save():
+        if sort_on_load_save():
             if not self.on_sort(view):
                 view.settings().set('tabsextra_to_sort', True)
+        else:
+            if CUSTOM_OPEN_FOCUS:
+                self.on_load_focus(view)
+
+    def on_load_focus(self, view):
+        window = view.window()
+        if window is None:
+            return
+
+        global LAST_ACTIVE
+        loaded = view.settings().get("tabs_extra_load_flag", False)
+        print(loaded)
+        if not loaded:
+            sheet = window.active_sheet()
+            focus_type = custom_focus_on_load()
+            sheets = window.sheets()
+            group, index = window.get_sheet_index(sheet)
+            last_group = None
+            last_index = None
+            if LAST_ACTIVE is not None:
+                for s in sheets:
+                    print(LAST_ACTIVE.file_name())
+                    if LAST_ACTIVE.id() == s.view().id():
+                        last_group, last_index = window.get_sheet_index(s)
+                        break
+            active_in_range = (
+                last_group is not None and
+                last_index is not None and
+                last_group == group
+            )
+            print('-----')
+            print(group)
+            print(index)
+            print(active_in_range)
+            if focus_type == "right":
+                group, index = window.get_sheet_index(sheets[-1])
+                window.set_sheet_index(sheet, group, index)
+            elif focus_type == "left":
+                group, index = window.get_sheet_index(sheets[0])
+                window.set_sheet_index(sheet, group, index)
+            elif focus_type == "active_right" and active_in_range:
+                window.set_sheet_index(sheet, group, last_index + 1)
+            elif focus_type == "active_left" and active_in_range:
+                print("active_left")
+                window.set_sheet_index(sheet, group, last_index)
+
+            view.settings().set("tabs_extra_load_flag", True)
 
     def on_post_save(self, view):
-        if sort_on_save():
+        if sort_on_load_save():
             self.on_sort(view)
 
     def on_sort(self, view):
@@ -664,11 +717,10 @@ class TabsExtraListener(sublime_plugin.EventListener):
                 return
             active_group, active_index = window.get_view_index(view)
             if window.id() != win_id or int(group_id) != int(active_group):
-                print('on_move')
                 view.settings().erase("tabs_extra_moving")
                 last_index = view.settings().get('tabs_extra_last_activated_sheet_index', -1)
                 self.on_move(view, win_id, int(group_id), last_index)
-        elif sort_on_save() and view.settings().get('tabsextra_to_sort'):
+        elif sort_on_load_save() and view.settings().get('tabsextra_to_sort'):
             view.settings().erase('tabsextra_to_sort')
             self.on_sort(view)
 
