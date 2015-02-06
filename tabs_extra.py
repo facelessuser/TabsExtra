@@ -82,7 +82,7 @@ def sort_on_load_save():
 
 def view_spawn_pos():
     """ Where do new views get spawned """
-    return sublime.load_settings(SETTINGS).get("span_view", "active_right")
+    return sublime.load_settings(SETTINGS).get("spawn_view", "active_right")
 
 
 def get_fallback_direction():
