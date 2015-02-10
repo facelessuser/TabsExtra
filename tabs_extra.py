@@ -621,8 +621,8 @@ class TabsExtraListener(sublime_plugin.EventListener):
                 last_index = None
                 if LAST_ACTIVE is not None:
                     for s in sheets:
-                        print(LAST_ACTIVE.file_name())
-                        if LAST_ACTIVE.id() == s.view().id():
+                        v = s.view()
+                        if v is not None and LAST_ACTIVE.id() == view.id():
                             last_group, last_index = window.get_sheet_index(s)
                             break
                 active_in_range = (
