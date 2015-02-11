@@ -82,7 +82,7 @@ def sort_on_load_save():
 
 def view_spawn_pos():
     """ Where do new views get spawned """
-    return sublime.load_settings(SETTINGS).get("spawn_view", "active_right")
+    return sublime.load_settings(SETTINGS).get("spawn_view", "none")
 
 
 def get_fallback_direction():
@@ -615,32 +615,32 @@ class TabsExtraListener(sublime_plugin.EventListener):
             if not loaded:
                 sheet = window.active_sheet()
                 spawn = view_spawn_pos()
-                sheets = window.sheets()
-                group, index = window.get_sheet_index(sheet)
-                last_group = None
-                last_index = None
-                if LAST_ACTIVE is not None:
-                    for s in sheets:
-                        v = s.view()
-                        if v is not None and LAST_ACTIVE.id() == view.id():
-                            last_group, last_index = window.get_sheet_index(s)
-                            break
-                active_in_range = (
-                    last_group is not None and
-                    last_index is not None and
-                    last_group == group
-                )
-                if spawn == "right":
-                    group, index = window.get_sheet_index(sheets[-1])
-                    window.set_sheet_index(sheet, group, index)
-                elif spawn == "left":
-                    group, index = window.get_sheet_index(sheets[0])
-                    window.set_sheet_index(sheet, group, index)
-                elif spawn == "active_right" and active_in_range:
-                    window.set_sheet_index(sheet, group, last_index + 1)
-                elif spawn == "active_left" and active_in_range:
-                    print("active_left")
-                    window.set_sheet_index(sheet, group, last_index)
+                if spawn != "none":
+                    sheets = window.sheets()
+                    group, index = window.get_sheet_index(sheet)
+                    last_group = None
+                    last_index = None
+                    if LAST_ACTIVE is not None:
+                        for s in sheets:
+                            v = s.view()
+                            if v is not None and LAST_ACTIVE.id() == v.id():
+                                last_group, last_index = window.get_sheet_index(s)
+                                break
+                    active_in_range = (
+                        last_group is not None and
+                        last_index is not None and
+                        last_group == group
+                    )
+                    if spawn == "right":
+                        group, index = window.get_sheet_index(sheets[-1])
+                        window.set_sheet_index(sheet, group, index)
+                    elif spawn == "left":
+                        group, index = window.get_sheet_index(sheets[0])
+                        window.set_sheet_index(sheet, group, index)
+                    elif spawn == "active_right" and active_in_range:
+                        window.set_sheet_index(sheet, group, last_index + 1)
+                    elif spawn == "active_left" and active_in_range:
+                        window.set_sheet_index(sheet, group, last_index)
 
                 view.settings().set("tabs_extra_spawned", True)
 

@@ -7,8 +7,8 @@
     // If active window gets closed, default to (left|right|last_active)
     "fallback_focus": "right",
 
-    // When opening a view, where should it be spawned at (left|active_left|active_right|right)
-    "spawn_view": "active_right",
+    // Experimental: When opening a view, where should it be spawned at (none|left|active_left|active_right|right)
+    "spawn_view": "none",
 
     // Menu layout include or exclude, in whatever order you desire, the following options:
     // ["close", "sticky", "open", "clone", "save", "delete", "rename", "reveal", "path", "revert", "sort"]
