@@ -533,7 +533,7 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
                             v.settings().erase("tabs_extra_sticky")
                         self.window.focus_view(v)
                         if not v.is_dirty() or close_unsaved:
-                            if v.is_dirty() and not unsaved_prompt:
+                            if not unsaved_prompt:
                                 v.set_scratch(True)
                             self.window.run_command("close_file")
                     elif not self.persistent:
