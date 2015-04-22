@@ -19,6 +19,9 @@ Sublime Plugin with sticky tabs, more tab closing options, tab sorting, and tab 
 # ST2 Support?
 Sorry, there are no plans for ST2 support.
 
+# Documentation
+http://facelessuser.github.io/TabsExtra/
+
 # License
 
 TabsExtra is released under the MIT license.
