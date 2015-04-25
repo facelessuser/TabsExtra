@@ -1,10 +1,16 @@
-# Usage
-Using TabsExtra is very straight forward once the menu is created.  TabsExtra will update the right click context menu of tabs with various useful features.  It also a couple of Sublime's commands to allow for various improvements in relation to tab focus when closing files, tab postion when opening files, and making available new useful close commands.
+# User Guide {: .doctitle}
+Configuration and usage of TabsExtra.
+{: .doctitle-info}
 
-## Install/Upgrade Menu
+---
+
+# General Usage
+Using TabsExtra is very straight forward once the menu is created.  TabsExtra will update the right click context menu of tabs with various useful features.  It also has a couple of Sublime's commands to allow for various improvements in relation to tab focus when closing files, tab position when opening files, and making available new useful close commands.
+
+# Install/Upgrade Menu
 When first installing TabsExtra, you need to Install the new menu; this does not happen automatically.  Go to `Preferences->Package Settings->TabsExtra` and Install/Upgrade either the **basic** tab menu or the **override** menu. The **basic** menu's commands won't be grouped together with the built-in options because of the way Sublime Text's menus are managed.  But the **override** menu overrides the **Default** Package's tab context menu for sane, clean grouping of the commands.
 
-## Which Commands does TabsExtra Override?
+# Which Commands does TabsExtra Override?
 TabsExtra does **not** override `close_file`, but it does override the following:
 
 - `close_by_index`: close view from tab
@@ -13,10 +19,10 @@ TabsExtra does **not** override `close_file`, but it does override the following
 - `close_others_by_index`: close other tabs in current group
 - `close_to_right_by_index` close tabs to right in current group
 
-## What TabsExtra Cannot Do
+# What TabsExtra Cannot Do
 TabsExtra **cannot** override the tab close button.  But it should be able to predict when it is pressed, and focus the appropriate window after the close.
 
-## Sticky Tab Settings
+# Sticky Tab Settings
 By default, after any `Close` command is run, all `Sticky` tab properties are forgotten.  You can make a tab's `Stickiness` persist by enabling the following setting:
 
 ```javascript
@@ -31,7 +37,7 @@ By default TabsExtra keeps the current active tab focused, but if the active tab
     "fallback_focus": "right"
 ```
 
-## Tab Spawn Position
+# Tab Spawn Position
 TabsExtra can control where a new window is opened with the `spawn_view` settings option.
 
 ```js
@@ -39,7 +45,7 @@ TabsExtra can control where a new window is opened with the `spawn_view` setting
     "spawn_view": "none",
 ```
 
-## Tab Sort
+# Tab Sort
 TabsExtra adds various sort options to the tab context menu.  You can control which sort options appear and even configure a specific sort command to run when a file is saved in the settings file.  You can also adjust how numbers in strings are sorted.
 
 ```js
@@ -76,7 +82,7 @@ TabsExtra adds various sort options to the tab context menu.  You can control wh
     "sort_on_load_save_command": {"module": "TabsExtra.sort.name"}
 ```
 
-Sort options are actually provided by small sort modules.  As seen above, sort modules are specified in the settings file like you are importing a python module.  The package folder would be the root of the module and would then be followed by the subfolders and the actual module name; all would be separated with dots.  As shown above, TabsExtra comes with 9 different sort modules: name, path, modified, created, type, size, activated, syntax, reverse.  If these modules do not suit your needs, you can right your own.
+Sort options are actually provided by small sort modules.  As seen above, sort modules are specified in the settings file like you are importing a python module.  The package folder would be the root of the module and would then be followed by the sub-folders and the actual module name; all would be separated with dots.  As shown above, TabsExtra comes with 9 different sort modules: name, path, modified, created, type, size, activated, syntax, reverse.  If these modules do not suit your needs, you can right your own.
 
 Within a sort module, there must be a run method as shown above below:
 

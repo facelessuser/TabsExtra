@@ -1,7 +1,13 @@
-# TabsExtra
-<img src="https://dl.dropboxusercontent.com/u/342698/TabsExtra/Menu.png" border="0"/>
+# TabsExtra {: .doctitle}
+Tab context menu enhancements for Sublime Text.
+{: .doctitle-info}
 
+---
+
+# Overview
 Sublime Plugin with sticky tabs, more tab closing options, tab sorting, and tab access to cloning, deleting, renaming etc.  ST3 is the only supported platform.
+
+<img src="https://dl.dropboxusercontent.com/u/342698/TabsExtra/Menu.png" border="0"/>
 
 # Features
 

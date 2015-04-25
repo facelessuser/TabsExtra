@@ -1,4 +1,6 @@
-# License
+# License {: .doctitle}
+
+---
 
 TabsExtra is released under the MIT license.
 
