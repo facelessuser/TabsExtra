@@ -1,16 +1,15 @@
 # User Guide {: .doctitle}
 Configuration and usage of TabsExtra.
-{: .doctitle-info}
 
 ---
 
-# General Usage
-Using TabsExtra is very straight forward once the menu is created.  TabsExtra will update the right click context menu of tabs with various useful features.  It also has a couple of Sublime's commands to allow for various improvements in relation to tab focus when closing files, tab position when opening files, and making available new useful close commands.
+## General Usage
+Using TabsExtra is very straight forward once the menu is created.  TabsExtra will update the right click context menu of tabs with various useful features.  It also overrides a couple of Sublime's commands to allow for various improvements in relation to tab focus when closing files, tab position when opening files, and making available new useful close commands.
 
-# Install/Upgrade Menu
+## Install/Upgrade Menu
 When first installing TabsExtra, you need to Install the new menu; this does not happen automatically.  Go to `Preferences->Package Settings->TabsExtra` and Install/Upgrade either the **basic** tab menu or the **override** menu. The **basic** menu's commands won't be grouped together with the built-in options because of the way Sublime Text's menus are managed.  But the **override** menu overrides the **Default** Package's tab context menu for sane, clean grouping of the commands.
 
-# Which Commands does TabsExtra Override?
+## Which Commands does TabsExtra Override?
 TabsExtra does **not** override `close_file`, but it does override the following:
 
 - `close_by_index`: close view from tab
@@ -19,17 +18,17 @@ TabsExtra does **not** override `close_file`, but it does override the following
 - `close_others_by_index`: close other tabs in current group
 - `close_to_right_by_index` close tabs to right in current group
 
-# What TabsExtra Cannot Do
+## What TabsExtra Cannot Do
 TabsExtra **cannot** override the tab close button.  But it should be able to predict when it is pressed, and focus the appropriate window after the close.
 
-# Sticky Tab Settings
+## Sticky Tab Settings
 By default, after any `Close` command is run, all `Sticky` tab properties are forgotten.  You can make a tab's `Stickiness` persist by enabling the following setting:
 
 ```javascript
     "persistent_sticky": false,
 ```
 
-## Tab Focus After Close
+### Tab Focus After Close
 By default TabsExtra keeps the current active tab focused, but if the active tab gets deleted, TabsExtra will default to either the left, right, or last active tab (depending how the user has it set).
 
 ```javascript
@@ -37,7 +36,7 @@ By default TabsExtra keeps the current active tab focused, but if the active tab
     "fallback_focus": "right"
 ```
 
-# Tab Spawn Position
+## Tab Spawn Position
 TabsExtra can control where a new window is opened with the `spawn_view` settings option.
 
 ```js
@@ -45,7 +44,7 @@ TabsExtra can control where a new window is opened with the `spawn_view` setting
     "spawn_view": "none",
 ```
 
-# Tab Sort
+## Tab Sort
 TabsExtra adds various sort options to the tab context menu.  You can control which sort options appear and even configure a specific sort command to run when a file is saved in the settings file.  You can also adjust how numbers in strings are sorted.
 
 ```js
@@ -101,7 +100,7 @@ def run(views, view_data)
 
     Example module:
 
-    ```
+    ```python
     from os.path import dirname, basename
     from TabsExtra import tab_sort_helper as tsh
 
@@ -117,10 +116,10 @@ def run(views, view_data)
             )
     ```
 
-# Additional Menu Helper Commands
+## Additional Menu Helper Commands
 TabsExtra also adds a number of other miscellaneous useful tab context commands that can open recently tabs, delete tabs from the disk, rename the current file, reveal the the tab's file in the sidebar or file manager, retrieve the file path, and revert unsaved changes.
 
-# Customize Tab Context Menu
+## Customize Tab Context Menu
 The tab menu adds a number of times.  Each item group can be re-ordered, or excluded if desired via the settings file.
 
 ```javascript

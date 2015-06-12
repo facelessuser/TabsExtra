@@ -3,25 +3,28 @@ repo_url: https://github.com/facelessuser/TabsExtra
 site_description: Sublime Plugin with sticky tabs, more tab closing options, and additional menu items.
 copyright: Copyright &copy; 2014 - 2015 <a href="https://github.com/facelessuser">Isaac Muse</a>
 pages:
-- ['index.md', 'Home']
-- ['usage.md', 'User Guide']
-- ['license.md', 'License']
+  - About TabsExtra: index.md
+  - Installation: installation.md
+  - User Guide: usage.md
+  - Contributing &amp; Support: contributing.md
+  - License: license.md
 theme: readthedocs
 theme_dir: doc_theme
 markdown_extensions:
-- markdown.extensions.extra
-- markdown.extensions.admonition
-- markdown.extensions.smarty
-- markdown.extensions.nl2br
-- markdown.extensions.codehilite
-- pymdownx.inlinehilite
-- pymdownx.magiclink
-- pymdownx.betterem
-- pymdownx.tilde
-- pymdownx.caret
-- pymdownx.smartsymbols
-- pymdownx.githubemoji
-- pymdownx.tasklist
-- pymdownx.superfences
-- pymdownx.progressbar
-- pymdownx.headeranchor
+  - markdown.extensions.extra
+  - markdown.extensions.admonition
+  - markdown.extensions.smarty
+  - markdown.extensions.nl2br
+  - markdown.extensions.codehilite:
+      guess_lang: false
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.betterem
+  - pymdownx.tilde
+  - pymdownx.caret
+  - pymdownx.smartsymbols
+  - pymdownx.githubemoji
+  - pymdownx.tasklist
+  - pymdownx.superfences
+  - pymdownx.progressbar
+  - pymdownx.headeranchor
