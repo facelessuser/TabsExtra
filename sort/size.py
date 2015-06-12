@@ -1,9 +1,17 @@
+"""
+Sort by file/buffer size.
+
+Copyright (c) 2014 - 2015 Isaac Muse <isaacmuse@gmail.com>
+License: MIT
+"""
 import sublime
 from os.path import getsize, exists, basename
 from TabsExtra import tab_sort_helper as tsh
 
 
 def run(views, view_data):
+    """Prep data for sort."""
+
     for v in views:
         file_name = v.file_name()
         if file_name is not None and exists(file_name):

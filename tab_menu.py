@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 """
-TabsExtra
+TabsExtra.
 
 Copyright (c) 2014 Isaac Muse <isaacmuse@gmail.com>
 License: MIT
@@ -40,11 +41,14 @@ UPGRADE_MSG = '''
 
 ======================================================================================
 
-Menu format upgraded to version (%(format)s). To pick up these changes, do one of the following:
+Menu format upgraded to version (%(format)s). To pick up these changes, do one of the
+following:
 
-1. If using the override menu, select "Preferences->Package Settings->TabsExtra->Install/Upgrade Default Override Menu" from Sublime's menu.
+1. If using the override menu, select "Preferences->Package Settings->TabsExtra->Install/Upgrade Default Override Menu"
+   from Sublime's menu.
 
-2. If using the default menu, select "Preferences->Package Settings->TabsExtra->Install/Upgrade TabsExtra Menu" from the menu" from Sublime's menu.
+2. If using the default menu, select "Preferences->Package Settings->TabsExtra->Install/Upgrade TabsExtra Menu"
+   from the menu" from Sublime's menu.
 
 ======================================================================================
 
@@ -80,19 +84,19 @@ CLOSE_OPTIONS = '''    { "caption": "-"},
             { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "left", "unsaved_prompt": false }, "caption": "Close Tabs to the Left" },
             { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "all", "unsaved_prompt": false }, "caption": "Close All Tabs" }
         ]
-    }'''
+    }'''  # noqa
 
 STICKY_OPTIONS = '''    { "caption": "-" },
     { "command": "tabs_extra_toggle_sticky", "args": { "group": -1, "index": -1 }, "caption": "Sticky Tab" },
-    { "command": "tabs_extra_clear_all_sticky", "args": { "group": -1, "force": true }, "caption": "Clear All Sticky Tabs" }'''
+    { "command": "tabs_extra_clear_all_sticky", "args": { "group": -1, "force": true }, "caption": "Clear All Sticky Tabs" }'''  # noqa
 
 SAVE_OPTIONS = '''    { "caption": "-" },
     { "command": "tabs_extra_view_wrapper", "args": {"group": -1, "index": -1, "command": "save"}, "caption": "Save" },
     { "command": "tabs_extra_view_wrapper", "args": {"group": -1, "index": -1, "command": "prompt_save_as"}, "caption": "Save As…" },
-    { "command": "save_all", "caption": "Save All" }'''
+    { "command": "save_all", "caption": "Save All" }'''  # noqa
 
 CLONE_OPTIONS = '''    { "caption": "-" },
-    { "command": "tabs_extra_view_wrapper", "args": {"group": -1, "index": -1, "command": "clone_file"}, "caption": "Clone" }'''
+    { "command": "tabs_extra_view_wrapper", "args": {"group": -1, "index": -1, "command": "clone_file"}, "caption": "Clone" }'''  # noqa
 
 OPEN_OPTIONS = '''    { "caption": "-" },
 %(override)s
@@ -100,7 +104,7 @@ OPEN_OPTIONS = '''    { "caption": "-" },
 
 REVEAL_OPTIONS = '''    { "caption": "-" },
     { "command": "tabs_extra_file", "args": {"group": -1, "index": -1, "command": "open_dir", "args": {"dir": "$file_path", "file": "$file_name"}}, "caption": "Open Containing Folder…" },
-    { "command": "tabs_extra_file", "args": {"group": -1, "index": -1, "command": "reveal_in_side_bar"}, "caption": "Reveal in Side Bar" }'''
+    { "command": "tabs_extra_file", "args": {"group": -1, "index": -1, "command": "reveal_in_side_bar"}, "caption": "Reveal in Side Bar" }'''  # noqa
 
 PATH_OPTIONS = '''    {
         "caption": "Copy File Path",
@@ -109,10 +113,10 @@ PATH_OPTIONS = '''    {
             { "command": "tabs_extra_file_path", "args": {"group": -1, "index": -1, "path_type": "path"}, "caption": "Full Path" },
             { "command": "tabs_extra_file_path", "args": {"group": -1, "index": -1, "path_type": "name"}, "caption": "File Name" }
         ]
-    }'''
+    }'''  # noqa
 
 REVERT_OPTIONS = '''    { "caption": "-" },
-    { "command": "tabs_extra_revert", "args": {"group": -1, "index": -1, "command": "revert"}, "caption": "Revert File" }'''
+    { "command": "tabs_extra_revert", "args": {"group": -1, "index": -1, "command": "revert"}, "caption": "Revert File" }'''  # noqa
 
 DELETE_OPTIONS = '''    { "caption": "-" },
     { "command": "tabs_extra_delete", "args": {"group": -1, "index": -1}, "caption": "Delete File" }'''
@@ -130,14 +134,14 @@ SORT_OPTIONS = '''    { "caption": "-" },
         ]
     }'''
 
-SORT_ENTRY = '            { "command": "tabs_extra_sort", "args": {"group": -1, "sort_by": "%(sort_by)s", "reverse": %(reverse)s}, "caption": "%(caption)s" }'
+SORT_ENTRY = '            { "command": "tabs_extra_sort", "args": {"group": -1, "sort_by": "%(sort_by)s", "reverse": %(reverse)s}, "caption": "%(caption)s" }'  # noqa
 
 ###############################
 # Override Menu Options
 ###############################
 OVERRIDE_CLOSE_OPTIONS = '''    { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "single" }, "caption": "Close" },
     { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "other" }, "caption": "Close Other Tabs" },
-    { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "right" }, "caption": "Close Tabs to the Right" },'''
+    { "command": "tabs_extra_close", "args": { "group": -1, "index": -1, "close_type": "right" }, "caption": "Close Tabs to the Right" },'''  # noqa
 
 OVERRIDE_OPEN_OPTIONS = '''    { "command": "new_file", "caption": "New File" },
     { "command": "prompt_open_file", "caption": "Open File" },'''
@@ -164,10 +168,11 @@ OVERRIDE_MAP = {
 
 
 class TabsExtraMessageCommand(sublime_plugin.TextCommand):
+
+    """Display Tabs Extra message for upgrade."""
+
     def run(self, edit):
-        """
-        Display upgrade message.
-        """
+        """Display upgrade message."""
 
         self.view.set_scratch(True)
         self.view.settings().set("word_wrap", True)
@@ -177,11 +182,12 @@ class TabsExtraMessageCommand(sublime_plugin.TextCommand):
 
 
 def get_menu(override=False):
-    """
-    Return the formatted tab menu.
-    """
+    """Return the formatted tab menu."""
 
-    default_layout = ["close", "sticky", "open", "clone", "save", "delete", "rename", "reveal", "path", "revert", "sort"]
+    default_layout = [
+        "close", "sticky", "open", "clone", "save", "delete",
+        "rename", "reveal", "path", "revert", "sort"
+    ]
     layout = sublime.load_settings(SETTINGS).get("menu_layout", default_layout)
     entries = []
     for entry in layout:
@@ -210,9 +216,7 @@ def get_menu(override=False):
 
 
 def upgrade_override_menu():
-    """
-    Install/Upgrade the override menu.
-    """
+    """Install/Upgrade the override menu."""
 
     menu_path = join(sublime.packages_path(), "User", PACKAGE_NAME)
     version_file = join(menu_path, VERSION_FILE)
@@ -234,7 +238,9 @@ def upgrade_override_menu():
 
 def uninstall_override_menu():
     """
-    Uninstall the override menu.  Re-install the default TabsExtra menu.
+    Uninstall the override menu.
+
+    Re-install the default TabsExtra menu.
     """
 
     default_path = join(sublime.packages_path(), "Default")
@@ -245,9 +251,7 @@ def uninstall_override_menu():
 
 
 def upgrade_default_menu():
-    """
-    Install/upgrade the standard tab menu.
-    """
+    """Install/upgrade the standard tab menu."""
 
     menu_path = join(sublime.packages_path(), "User", PACKAGE_NAME)
     menu = join(menu_path, TAB_MENU)
@@ -263,7 +267,9 @@ def upgrade_default_menu():
 
 def plugin_loaded():
     """
-    Install menu if nothing can be found. Alert the user to a menu upgrade if one is found.
+    Install menu if nothing can be found.
+
+    Alert the user to a menu upgrade if one is found.
     """
 
     menu_path = join(sublime.packages_path(), "User", PACKAGE_NAME)
@@ -282,7 +288,6 @@ def plugin_loaded():
                 v_old = json.loads(sanitize_json(f.read(), preserve_lines=True))
         except Exception as e:
             print(e)
-            pass
 
         if FORMAT_VERSION["version"] != v_old.get("version", ""):
             upgrade = True

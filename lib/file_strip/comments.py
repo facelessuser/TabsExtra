@@ -1,20 +1,14 @@
 """
-Comment Remover
+File Strip.
+
 Licensed under MIT
-Copyright (c) 2011 Isaac Muse <isaacmuse@gmail.com>
-https://gist.github.com/facelessuser/5750103
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Copyright (c) 2012 - 2015 Isaac Muse <isaacmuse@gmail.com>
 """
 import re
 
 LINE_PRESERVE = re.compile(r"\r?\n", re.MULTILINE)
 CPP_PATTERN = re.compile(
-    r"""
+    r'''(?x)
         (?P<comments>
             /\*[^*]*\*+(?:[^/*][^*]*\*+)*/  # multi-line comments
           | \s*//(?:[^\r\n])*               # single line comments
@@ -24,11 +18,11 @@ CPP_PATTERN = re.compile(
           | '(?:\\.|[^'\\])*'               # single quotes
           | .[^/"']*                        # everything else
         )
-    """,
-    re.VERBOSE | re.MULTILINE | re.DOTALL
+    ''',
+    re.DOTALL
 )
 PY_PATTERN = re.compile(
-    r"""
+    r'''(?x)
         (?P<comments>
             \s*\#(?:[^\r\n])*               # single line comments
         )
@@ -39,23 +33,32 @@ PY_PATTERN = re.compile(
           | '(?:\\.|[^'])*'                 # single quotes
           | .[^\#"']*                       # everything else
         )
-    """,
-    re.VERBOSE | re.MULTILINE | re.DOTALL
+    ''',
+    re.DOTALL
 )
 
 
 def _strip_regex(pattern, text, preserve_lines):
+    """Generic function that strips out comments pased on the given pattern."""
+
     def remove_comments(group, preserve_lines=False):
+        """Remove comments."""
+
         return ''.join([x[0] for x in LINE_PRESERVE.findall(group)]) if preserve_lines else ''
 
     def evaluate(m, preserve_lines):
+        """Search for comments."""
+
         g = m.groupdict()
         return g["code"] if g["code"] is not None else remove_comments(g["comments"], preserve_lines)
 
     return ''.join(map(lambda m: evaluate(m, preserve_lines), pattern.finditer(text)))
 
 
-def _cpp(self, text, preserve_lines=False):
+@staticmethod
+def _cpp(text, preserve_lines=False):
+    """C/C++ style comment stripper."""
+
     return _strip_regex(
         CPP_PATTERN,
         text,
@@ -63,7 +66,10 @@ def _cpp(self, text, preserve_lines=False):
     )
 
 
-def _python(self, text, preserve_lines=False):
+@staticmethod
+def _python(text, preserve_lines=False):
+    """Python style comment stripper."""
+
     return _strip_regex(
         PY_PATTERN,
         text,
@@ -72,33 +78,51 @@ def _python(self, text, preserve_lines=False):
 
 
 class CommentException(Exception):
+
+    """Comment exception."""
+
     def __init__(self, value):
+        """Setup exception."""
+
         self.value = value
 
     def __str__(self):
+        """Return exception value repr on string convert."""
+
         return repr(self.value)
 
 
 class Comments(object):
+
+    """Comment strip class."""
+
     styles = []
 
     def __init__(self, style=None, preserve_lines=False):
+        """Initialize."""
+
         self.preserve_lines = preserve_lines
         self.call = self.__get_style(style)
 
     @classmethod
     def add_style(cls, style, fn):
+        """Add comment style."""
+
         if style not in cls.__dict__:
             setattr(cls, style, fn)
             cls.styles.append(style)
 
     def __get_style(self, style):
+        """Get the comment style."""
+
         if style in self.styles:
             return getattr(self, style)
         else:
             raise CommentException(style)
 
     def strip(self, text):
+        """Strip comments."""
+
         return self.call(text, self.preserve_lines)
 
 Comments.add_style("c", _cpp)

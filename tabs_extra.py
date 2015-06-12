@@ -1,14 +1,14 @@
 """
-TabsExtra
+TabsExtra.
 
-Copyright (c) 2014 Isaac Muse <isaacmuse@gmail.com>
+Copyright (c) 2014 - 2015 Isaac Muse <isaacmuse@gmail.com>
 License: MIT
 """
 import sublime_plugin
 import sublime
 import time
 import sys
-from . import tab_menu
+from TabsExtra import tab_menu
 from os.path import exists, split, splitext, join, normpath, basename, dirname, isdir
 from os import rename
 import functools
@@ -30,20 +30,22 @@ OVERRIDE_CONFIRM = '''TabsExtra will overwrite the entire "Tab Context.sublime-m
 You do this at your own risk.  If something goes wrong, you may need to manually fix the menu.
 
 Are you sure you want to continue?
-'''
+'''  # noqa
 
 RESTORE_CONFIRM = '''In ST3 TabsExtra will simply delete the override "Tab Context.sublime-menu" from "Packages/Default" to allow the archived menu to take effect.
 
 You do this at your own risk.  If something goes wrong, you may need to manually fix the menu.
 
 Are you sure you want to continue?
-'''
+'''  # noqa
 
 
 ###############################
 # Helpers
 ###############################
 def log(msg, status=False):
+    """Log message."""
+
     string = str(msg)
     print("TabsExtra: %s" % string)
     if status:
@@ -51,14 +53,14 @@ def log(msg, status=False):
 
 
 def debug(s):
+    """Debug message."""
+
     if sublime.load_settings(SETTINGS).get("debug", False):
         log(s)
 
 
 def sublime_format_path(pth):
-    """
-    Format path for sublime
-    """
+    """Format path for sublime."""
 
     import re
     m = re.match(r"^([A-Za-z]{1}):(?:/|\\)(.*)", pth)
@@ -68,27 +70,23 @@ def sublime_format_path(pth):
 
 
 def is_persistent():
-    """
-    Check if sticky tabs should be persistent.
-    """
+    """Check if sticky tabs should be persistent."""
 
     return sublime.load_settings(SETTINGS).get("persistent_sticky", False)
 
 
 def sort_on_load_save():
-    """ Sort on save """
+    """Sort on save."""
     return sublime.load_settings(SETTINGS).get("sort_on_load_save", False)
 
 
 def view_spawn_pos():
-    """ Where do new views get spawned """
+    """Where do new views get spawned."""
     return sublime.load_settings(SETTINGS).get("spawn_view", "none")
 
 
 def get_fallback_direction():
-    """
-    Get the focused tab fallback direction.
-    """
+    """Get the focused tab fallback direction."""
 
     mode = LEFT
     value = sublime.load_settings(SETTINGS).get("fallback_focus", "left")
@@ -100,9 +98,7 @@ def get_fallback_direction():
 
 
 def timestamp_view(window, sheet):
-    """
-    Timestamp view.
-    """
+    """Timestamp view."""
 
     global LAST_ACTIVE
     view = window.active_view()
@@ -139,9 +135,7 @@ def timestamp_view(window, sheet):
 
 
 def get_group_view(window, group, index):
-    """
-    Get the view at the given index in the given group.
-    """
+    """Get the view at the given index in the given group."""
 
     if SHEET_WORKAROUND:
         active_sheet = window.active_sheet()
@@ -167,16 +161,23 @@ def get_group_view(window, group, index):
 
 
 class Focus(object):
+
+    """View focus handler."""
+
     win = None
     obj = None
 
     @classmethod
     def cancel(cls):
+        """Cancel focus."""
+
         cls.win = None
         cls.obj = None
 
     @classmethod
     def defer(cls, win, obj):
+        """Defer focus."""
+
         if cls.win is None and cls.obj is None:
             cls.win = win
             cls.obj = obj
@@ -187,16 +188,22 @@ class Focus(object):
 
     @classmethod
     def on_focus(cls):
+        """On focus event."""
+
         cls._focus()
 
     @classmethod
     def focus(cls, win, obj):
+        """Set the win and obj before calling focus."""
+
         cls.win = win
         cls.obj = obj
         cls._focus()
 
     @classmethod
     def _focus(cls):
+        """Perform view focus."""
+
         try:
             if cls.win is not None and cls.obj is not None:
                 if isinstance(cls.obj, sublime.View):
@@ -205,7 +212,7 @@ class Focus(object):
                 elif isinstance(cls.obj, sublime.Sheet):
                     cls.win.focus_sheet(cls.obj)
                     timestamp_view(cls.win, cls.obj)
-        except:
+        except Exception:
             pass
         cls.cancel()
 
@@ -214,10 +221,11 @@ class Focus(object):
 # Sticky Tabs
 ###############################
 class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
+
+    """Clear all sticy tabs."""
+
     def run(self, group=-1, force=False):
-        """
-        Clear all tab sticky states of current active group.
-        """
+        """Clear all tab sticky states of current active group."""
 
         if group == -1:
             group = self.window.active_group()
@@ -230,9 +238,7 @@ class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
                     v.settings().erase("tabs_extra_sticky")
 
     def is_visible(self, group=-1, force=False):
-        """
-        Show command if any tabs in active group are sticky.
-        """
+        """Show command if any tabs in active group are sticky."""
 
         if group == -1:
             group = self.window.active_group()
@@ -247,10 +253,11 @@ class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
 
 
 class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
+
+    """Toggle sticky state for tab."""
+
     def run(self, group=-1, index=-1):
-        """
-        Toggle a tabs sticky state.
-        """
+        """Toggle a tabs sticky state."""
 
         if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
@@ -261,9 +268,7 @@ class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
                     view.settings().erase("tabs_extra_sticky")
 
     def is_checked(self, group=-1, index=-1):
-        """
-        Show in menu whether the tab is sticky.
-        """
+        """Show in menu whether the tab is sticky."""
 
         checked = False
         if group >= 0 and index >= 0:
@@ -274,14 +279,17 @@ class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
 
 
 class TabsExtraSetStickyCommand(sublime_plugin.TextCommand):
+
+    """Set sticky value for the tab."""
+
     def run(self, edit, value):
-        """ Set the sticky command to the specific value """
+        """Set the sticky command to the specific value."""
 
         if self.is_enabled(value):
             self.view.settings().set("tabs_extra_sticky", bool(value))
 
     def is_enabled(self, value):
-        """ Check if sticky value is already set to desired value """
+        """Check if sticky value is already set to desired value."""
 
         enabled = False
         if self.view is not None:
@@ -295,6 +303,9 @@ class TabsExtraSetStickyCommand(sublime_plugin.TextCommand):
 # Close
 ###############################
 class TabsExtraCloseMenuCommand(sublime_plugin.WindowCommand):
+
+    """Close tabs via a quick panel menu."""
+
     close_types = [
         ("Close", "single"),
         ("Close Other Tabs", "other"),
@@ -304,6 +315,8 @@ class TabsExtraCloseMenuCommand(sublime_plugin.WindowCommand):
     ]
 
     def run(self, mode="normal", close_type=None):
+        """Run command."""
+
         self.mode = mode
         self.group = -1
         self.index = -1
@@ -327,6 +340,8 @@ class TabsExtraCloseMenuCommand(sublime_plugin.WindowCommand):
                 self.check_selection(value)
 
     def check_selection(self, value):
+        """Check the user's selection."""
+
         if value != -1:
             close_unsaved = True
             unsaved_prompt = True
@@ -347,6 +362,8 @@ class TabsExtraCloseMenuCommand(sublime_plugin.WindowCommand):
             )
 
     def is_enabled(self, mode="normal"):
+        """Check if command is enabled."""
+
         group = -1
         index = -1
         sheet = self.window.active_sheet()
@@ -356,10 +373,11 @@ class TabsExtraCloseMenuCommand(sublime_plugin.WindowCommand):
 
 
 class TabsExtraCloseAllCommand(sublime_plugin.WindowCommand):
+
+    """Close all tabs in the whole window."""
+
     def run(self):
-        """
-        Close all tabs in window; not just the tabs in the active group.
-        """
+        """Close all tabs in window; not just the tabs in the active group."""
 
         for group in range(0, self.window.num_groups()):
             sheet = self.window.active_sheet_in_group(group)
@@ -369,9 +387,13 @@ class TabsExtraCloseAllCommand(sublime_plugin.WindowCommand):
 
 
 class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
+
+    """Close tab command."""
+
     def init(self, close_type, group, index):
         """
         Determine which views will be targeted by close command.
+
         Also determine which tab states need to be cleaned up.
         """
 
@@ -425,9 +447,7 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
             self.cleanup = False
 
     def select_left(self, fallback=True):
-        """
-        Select tab to the left if the current active tab was closed.
-        """
+        """Select tab to the left if the current active tab was closed."""
 
         selected = False
         for x in reversed(range(0, self.active_index)):
@@ -441,9 +461,7 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
         return selected
 
     def select_right(self, fallback=True):
-        """
-        Select tab to the right if the current active tab was closed.
-        """
+        """Select tab to the right if the current active tab was closed."""
 
         selected = False
         for x in range(self.active_index + 1, len(self.sheets)):
@@ -457,9 +475,7 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
         return selected
 
     def select_last(self, fallback=True):
-        """
-        Select last activated tab if available.
-        """
+        """Select last activated tab if available."""
 
         selected = False
         self.last_activated = sorted(self.last_activated, key=lambda x: x[0])
@@ -481,9 +497,7 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
         return selected
 
     def select_view(self):
-        """
-        Select active tab, if available, or fallback to the left or right.
-        """
+        """Select active tab, if available, or fallback to the left or right."""
 
         selected = False
         if self.active_index is not None:
@@ -503,9 +517,7 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
         self, group=-1, index=-1,
         close_type="single", unsaved_prompt=True, close_unsaved=True
     ):
-        """
-        Close the specified tabs and cleanup sticky states.
-        """
+        """Close the specified tabs and cleanup sticky states."""
 
         TabsExtraListener.extra_command_call = True
 
@@ -553,12 +565,13 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
 # Listener
 ###############################
 class TabsExtraListener(sublime_plugin.EventListener):
+
+    """Listener command to handle tab focus, closing, moving events."""
+
     extra_command_call = False
 
     def on_window_command(self, window, command_name, args):
-        """
-        Intercept and override specific close tab commands.
-        """
+        """Intercept and override specific close tab commands."""
 
         extra_command_call = TabsExtraListener.extra_command_call
 
@@ -593,7 +606,8 @@ class TabsExtraListener(sublime_plugin.EventListener):
         return cmd
 
     def on_load(self, view):
-        """ Handle load focus or spawining """
+        """Handle load focus or spawining."""
+
         Focus.cancel()
 
         if sort_on_load_save():
@@ -604,9 +618,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
                 self.on_spawn(view)
 
     def on_spawn(self, view):
-        """ When a new view is spawned, postion the view per user's preference. """
-
-        global LAST_ACTIVE
+        """When a new view is spawned, postion the view per user's preference."""
 
         window = view.window()
         if window and window.get_view_index(view)[1] != -1:
@@ -645,12 +657,14 @@ class TabsExtraListener(sublime_plugin.EventListener):
                 view.settings().set("tabs_extra_spawned", True)
 
     def on_post_save(self, view):
-        """ On save sorting """
+        """On save sorting."""
+
         if sort_on_load_save():
             self.on_sort(view)
 
     def on_sort(self, view):
-        """ Sort views """
+        """Sort views."""
+
         sorted_views = False
         window = view.window()
         if window and window.get_view_index(view)[1] != -1:
@@ -668,8 +682,10 @@ class TabsExtraListener(sublime_plugin.EventListener):
     def on_pre_close(self, view):
         """
         If a view is closing without being marked, we know it was done outside of TabsExtra.
+
         Attach view and window info so we can focus the right view after close.
         """
+
         Focus.cancel()
 
         view.settings().set("tabs_extra_is_closed", True)
@@ -682,8 +698,9 @@ class TabsExtraListener(sublime_plugin.EventListener):
 
     def on_close(self, view):
         """
-        If close command was initiated outside of TabsExtra,
-        focus the correct view in window group.
+        Handle focusing the correct view in window group.
+
+        Close command was initiated outside of TabsExtra, so a focus is required.
         """
 
         view_info = view.settings().get("tabs_extra_view_info", None)
@@ -694,12 +711,13 @@ class TabsExtraListener(sublime_plugin.EventListener):
                     window = w
                     break
             if window is not None:
-                self.select_tab(w, int(view_info[0]), view_info[1])
+                self.select_tab(window, int(view_info[0]), view_info[1])
             TabsExtraListener.extra_command_call = False
 
     def on_activated(self, view):
         """
         Timestamp each view when activated.
+
         Detect if on_move event should be executed.
         """
 
@@ -718,7 +736,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
             window = view.window()
             if window is None:
                 return
-            active_group, active_index = window.get_view_index(view)
+            active_group = window.get_view_index(view)[0]
             if window.id() != win_id or int(group_id) != int(active_group):
                 view.settings().erase("tabs_extra_moving")
                 last_index = view.settings().get('tabs_extra_last_activated_sheet_index', -1)
@@ -728,10 +746,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
             self.on_sort(view)
 
     def on_move(self, view, win_id, group_id, last_index):
-        """
-        If a tab move to a new group was detected,
-        select the fallback tab in the group it was moved from.
-        """
+        """Select the fallback tab in the group it was moved from."""
 
         for w in sublime.windows():
             if w.id() == win_id:
@@ -739,9 +754,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
                 break
 
     def select_tab(self, window, group_id, last_index):
-        """
-        Select the desired fallback tab
-        """
+        """Select the desired fallback tab."""
 
         selected = False
         sheets = window.sheets_in_group(group_id)
@@ -758,9 +771,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
         return selected
 
     def select_last(self, sheets, window, closed_index, fallback=True):
-        """
-        Focus last active view.
-        """
+        """Ensure focus of last active view."""
 
         selected = False
         last_activated = []
@@ -787,9 +798,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
         return selected
 
     def select_right(self, sheets, window, closed_index, fallback=True):
-        """
-        Focus view to the right of closed view.
-        """
+        """Ensure focus of view to the right of closed view."""
 
         selected = False
         if len(sheets) > closed_index:
@@ -800,9 +809,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
         return selected
 
     def select_left(self, sheets, window, closed_index, fallback=True):
-        """
-        Focus view to the left of closed view.
-        """
+        """Ensure focus of view to the left of closed view."""
 
         selected = False
         if len(sheets) >= closed_index:
@@ -817,10 +824,11 @@ class TabsExtraListener(sublime_plugin.EventListener):
 # Wrappers
 ###############################
 class TabsExtraViewWrapperCommand(sublime_plugin.WindowCommand):
+
+    """Wrapper for for executing certain commands from the tab context menu."""
+
     def run(self, command, group=-1, index=-1, args={}):
-        """
-        Wrap command in order to ensure view gets focused first.
-        """
+        """Wrap command in order to ensure view gets focused first."""
 
         if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
@@ -833,10 +841,11 @@ class TabsExtraViewWrapperCommand(sublime_plugin.WindowCommand):
 # File Management Commands
 ###############################
 class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
+
+    """Delete the file."""
+
     def run(self, group=-1, index=-1):
-        """
-        Delete the tab's file
-        """
+        """Delete the tab's file."""
 
         if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
@@ -850,6 +859,8 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
                         send2trash.send2trash(file_name)
 
     def is_visible(self, group=-1, index=-1):
+        """Check if command should be visible."""
+
         enabled = False
         if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
@@ -859,17 +870,17 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
 
 
 class TabsExtraDuplicateCommand(sublime_plugin.WindowCommand):
+
+    """Duplicate tab."""
+
     def run(self, group=-1, index=-1):
-        """
-        Rename the given tab
-        """
+        """Rename the given tab."""
 
         if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
             if view is not None:
                 file_name = view.file_name()
                 if file_name is not None and exists(file_name):
-                    branch, leaf = split(file_name)
                     v = self.window.show_input_panel(
                         "Duplicate:", file_name,
                         lambda x: self.on_done(file_name, x),
@@ -886,6 +897,8 @@ class TabsExtraDuplicateCommand(sublime_plugin.WindowCommand):
                     )
 
     def on_done(self, old, new):
+        """Handle the tab duplication when the user is done with the input panel."""
+
         new_path = dirname(new)
         if exists(new_path) and isdir(new_path):
             if not exists(new) or sublime.ok_cancel_dialog("Overwrite %s?" % new, "Replace"):
@@ -897,10 +910,12 @@ class TabsExtraDuplicateCommand(sublime_plugin.WindowCommand):
                         f.write(text)
 
                     self.window.open_file(new)
-                except:
+                except Exception:
                     sublime.status_message("Unable to duplicate")
 
     def is_visible(self, group=-1, index=-1):
+        """Check if the command is visible."""
+
         enabled = False
         if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
@@ -910,10 +925,11 @@ class TabsExtraDuplicateCommand(sublime_plugin.WindowCommand):
 
 
 class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
+
+    """Rename the tab's file."""
+
     def run(self, group=-1, index=-1):
-        """
-        Rename the given tab
-        """
+        """Rename the given tab."""
 
         if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
@@ -926,11 +942,13 @@ class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
                         functools.partial(self.on_done, file_name, branch),
                         None, None
                     )
-                    name, ext = splitext(leaf)
+                    name = splitext(leaf)[0]
                     v.sel().clear()
                     v.sel().add(sublime.Region(0, len(name)))
 
     def on_done(self, old, branch, leaf):
+        """Handle the renaming when user is done with the input panel."""
+
         new = join(branch, leaf)
 
         try:
@@ -939,10 +957,12 @@ class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
             v = self.window.find_open_file(old)
             if v:
                 v.retarget(new)
-        except:
+        except Exception:
             sublime.status_message("Unable to rename")
 
     def is_visible(self, group=-1, index=-1):
+        """Check if the command is visible."""
+
         enabled = False
         if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
@@ -952,10 +972,11 @@ class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
 
 
 class TabsExtraRevertCommand(TabsExtraViewWrapperCommand):
+
+    """Revert changes in file."""
+
     def is_visible(self, command, group=-1, index=-1, args={}):
-        """
-        Determine if command should be visible in menu.
-        """
+        """Determine if command should be visible in menu."""
 
         enabled = False
         if group >= 0 and index >= 0:
@@ -966,10 +987,11 @@ class TabsExtraRevertCommand(TabsExtraViewWrapperCommand):
 
 
 class TabsExtraFileCommand(TabsExtraViewWrapperCommand):
+
+    """Wrapper for file commands."""
+
     def is_enabled(self, command, group=-1, index=-1, args={}):
-        """
-        Determine if command should be enabled.
-        """
+        """Determine if command should be enabled."""
 
         enabled = False
         if group >= 0 and index >= 0:
@@ -980,7 +1002,12 @@ class TabsExtraFileCommand(TabsExtraViewWrapperCommand):
 
 
 class TabsExtraFilePathCommand(sublime_plugin.WindowCommand):
+
+    """Get file paths."""
+
     def run(self, group=-1, index=-1, path_type='path'):
+        """Run the command."""
+
         if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
             if view is not None:
@@ -992,9 +1019,7 @@ class TabsExtraFilePathCommand(sublime_plugin.WindowCommand):
                 sublime.set_clipboard(pth)
 
     def is_enabled(self, group=-1, index=-1, path_type='path'):
-        """
-        Determine if command should be enabled.
-        """
+        """Determine if command should be enabled."""
 
         enabled = False
         if group >= 0 and index >= 0:
@@ -1008,8 +1033,12 @@ class TabsExtraFilePathCommand(sublime_plugin.WindowCommand):
 # Sort
 ###############################
 class TabsExtraSortMenuCommand(sublime_plugin.WindowCommand):
+
+    """Sort tabs."""
+
     def run(self):
-        """ Using "sort_layout" setting, construct a quick panel sort menu """
+        """Using "sort_layout" setting, construct a quick panel sort menu."""
+
         sort_layout = sublime.load_settings(SETTINGS).get("sort_layout", [])
         if len(sort_layout):
             self.sort_commands = []
@@ -1025,17 +1054,19 @@ class TabsExtraSortMenuCommand(sublime_plugin.WindowCommand):
                 self.window.show_quick_panel(sort_menu, self.check_selection)
 
     def check_selection(self, value):
-        """ Launch the selected sort command """
+        """Launch the selected sort command."""
+
         if value != -1:
             command = self.sort_commands[value]
             self.window.run_command("tabs_extra_sort", {"sort_by": command[0], "reverse": command[1]})
 
 
 class TabsExtraSortCommand(sublime_plugin.WindowCommand):
+
+    """Sort tabs."""
+
     def run(self, group=-1, sort_by=None, reverse=False):
-        """
-        Sort Tabs
-        """
+        """Sort Tabs."""
 
         if sort_by is not None:
             if group == -1:
@@ -1052,9 +1083,7 @@ class TabsExtraSortCommand(sublime_plugin.WindowCommand):
                     self.window.focus_view(self.window.active_view())
 
     def sort(self, view_data):
-        """
-        Sort the views
-        """
+        """Sort the views."""
 
         indexes = tuple([x for x in range(0, len(view_data[0]) - 1)])
         sorted_views = sorted(view_data, key=itemgetter(*indexes))
@@ -1064,9 +1093,7 @@ class TabsExtraSortCommand(sublime_plugin.WindowCommand):
             self.window.set_view_index(sorted_views[index][-1], self.group, index)
 
     def get_sort_module(self, module_name):
-        """
-        Import the sort_by module
-        """
+        """Import the sort_by module."""
 
         import imp
         path_name = join("Packages", normpath(module_name.replace('.', '/')))
@@ -1087,10 +1114,11 @@ class TabsExtraSortCommand(sublime_plugin.WindowCommand):
 # Menu Installation
 ###############################
 class TabsExtraInstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
+
+    """Install TabsExtra menu overriding the default tab context menu."""
+
     def run(self):
-        """
-        Install/upgrade the override tab menu.
-        """
+        """Install/upgrade the override tab menu."""
 
         msg = OVERRIDE_CONFIRM
         if sublime.ok_cancel_dialog(msg):
@@ -1098,10 +1126,11 @@ class TabsExtraInstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
 
 
 class TabsExtraUninstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
+
+    """Uninstall the TabsExtra override menu."""
+
     def run(self):
-        """
-        Uninstall the override tab menu.
-        """
+        """Uninstall the override tab menu."""
 
         msg = RESTORE_CONFIRM
         if sublime.ok_cancel_dialog(msg):
@@ -1109,10 +1138,11 @@ class TabsExtraUninstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
 
 
 class TabsExtraInstallMenuCommand(sublime_plugin.ApplicationCommand):
+
+    """Install the TabsExtra menu by appending it to the existing tab context menu."""
+
     def run(self):
-        """
-        Install/upgrade the standard tab menu.
-        """
+        """Install/upgrade the standard tab menu."""
 
         tab_menu.upgrade_default_menu()
 
@@ -1121,6 +1151,8 @@ class TabsExtraInstallMenuCommand(sublime_plugin.ApplicationCommand):
 # Plugin Loading
 ###############################
 def plugin_loaded():
+    """Handle plugin setup."""
+
     win = sublime.active_window()
     if win is not None:
         sheet = win.active_sheet()

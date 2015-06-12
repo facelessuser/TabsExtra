@@ -1,3 +1,4 @@
+"""Tabs sort helper."""
 from itertools import groupby
 import sublime
 
@@ -5,6 +6,8 @@ SETTINGS = "tabs_extra.sublime-settings"
 
 
 def numeric_sort(text):
+    """Sort numbers in strings as actual numbers."""
+
     if sublime.load_settings(SETTINGS).get("numeric_sort", False):
         final_text = []
         for digit, g in groupby(text, lambda x: x.isdigit()):

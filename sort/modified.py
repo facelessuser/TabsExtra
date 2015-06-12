@@ -1,9 +1,17 @@
+"""
+Sort by file modified time.
+
+Copyright (c) 2014 - 2015 Isaac Muse <isaacmuse@gmail.com>
+License: MIT
+"""
 import time
 from os.path import exists, getmtime, basename
 from TabsExtra import tab_sort_helper as tsh
 
 
 def run(views, view_data):
+    """Prep data for sort."""
+
     for v in views:
         file_name = v.file_name()
         modified = -1
@@ -12,7 +20,7 @@ def run(views, view_data):
             if not dirty:
                 try:
                     modified = getmtime(file_name)
-                except:
+                except Exception:
                     dirty = True
         else:
             dirty = True
