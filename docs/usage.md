@@ -4,13 +4,13 @@ Configuration and usage of TabsExtra.
 ---
 
 ## General Usage
-Using TabsExtra is very straight forward once the menu is created.  TabsExtra will update the right click context menu of tabs with various useful features.  It also overrides a couple of Sublime's commands to allow for various improvements in relation to tab focus when closing files, tab position when opening files, and making available new useful close commands.
+Using TabsExtra is very straight forward once the menu is created.  TabsExtra will update the right click context menu of tabs with various useful features.  It also overrides a couple of Sublime's commands to allow for various improvements in relation to tab closing, tab focus when closing files, and tab position when opening files.
 
 ## Install/Upgrade Menu
 When first installing TabsExtra, you need to Install the new menu; this does not happen automatically.  Go to `Preferences->Package Settings->TabsExtra` and Install/Upgrade either the **basic** tab menu or the **override** menu. The **basic** menu's commands won't be grouped together with the built-in options because of the way Sublime Text's menus are managed.  But the **override** menu overrides the **Default** Package's tab context menu for sane, clean grouping of the commands.
 
-## Which Commands does TabsExtra Override?
-TabsExtra does **not** override `close_file`, but it does override the following:
+## Which Commands does TabsExtra Override and Why?
+TabsExtra does **not** override `close_file`, but it does override the following to enhance tab closing behavior:
 
 - `close_by_index`: close view from tab
 - `close`: close active view from global menu
@@ -18,17 +18,34 @@ TabsExtra does **not** override `close_file`, but it does override the following
 - `close_others_by_index`: close other tabs in current group
 - `close_to_right_by_index` close tabs to right in current group
 
-## What TabsExtra Cannot Do
+This allows TabsExtra do special things like ignore certain tabs, focus a specific tab after closing tab(s), force close without prompting the user if they want to save for every unsaved tab, or even skip unsaved tabs when closing.
+
 TabsExtra **cannot** override the tab close button.  But it should be able to predict when it is pressed, and focus the appropriate window after the close.
 
-## Sticky Tab Settings
-By default, after any `Close` command is run, all `Sticky` tab properties are forgotten.  You can make a tab's `Stickiness` persist by enabling the following setting:
+## New Close Options
+TabsExtra expands how many close options there are in the tab context menu.  It also makes them available in the quick panel as well.
 
-```javascript
+- Close.
+- Close other tabs.
+- Close tabs to left.
+- Close tabs to right.
+- Close all tabs.
+
+And TabsExtra also provides variants that will force close unsaved tabs without annoying the user with a prompt for every unsaved tab.  It also provides variants to simply skip unsaved tabs.
+
+## Sticky Tabs
+TabsExtra allows users to make a tab *sticky*.  This allows the tab to not close when a bulk `close` operation is performed.  By default, after any `close` command is run, the *sticky* tab properties are forgotten.  You can make a tab's stickiness persist by enabling [persistent_sticky](#persistent_sticky).
+
+```js
+    // By default TabsExtra forgets a tab's "stickiness" when
+    // any "tab close" command is issued.  You can make the tab's
+    // "Stickiness" persist by enabling the following feature.
     "persistent_sticky": false,
 ```
 
-### Tab Focus After Close
+A tab's stickiness can be controlled either the context menu or the quick panel.
+
+## Tab Focus After Close
 By default TabsExtra keeps the current active tab focused, but if the active tab gets deleted, TabsExtra will default to either the left, right, or last active tab (depending how the user has it set).
 
 ```javascript
@@ -45,7 +62,53 @@ TabsExtra can control where a new window is opened with the `spawn_view` setting
 ```
 
 ## Tab Sort
-TabsExtra adds various sort options to the tab context menu.  You can control which sort options appear and even configure a specific sort command to run when a file is saved in the settings file.  You can also adjust how numbers in strings are sorted.
+TabsExtra adds various sort options to the tab context menu and quick panel.
+
+- Sort by name.
+- Sort by path.
+- Sort by modified.
+- Sort by created.
+- Sort by file extension.
+- Sort by size.
+- Sort by last activated.
+- Sort by syntax.
+- Sort current order in reverse.
+
+You can control how numbers are handled in strings by enabling `numeric_sort`.  Numbers in strings are sorted alphabetically by default, but you can cause the strings to be sorted numerically if needed.
+
+```js
+    // When sorting, normal strings will be sorted numerically.
+    //
+    // Example (non-numerical sort):
+    //   test12 test2 test1 => test1 test12 test2
+    //
+    // Example (numerical sort):
+    //   test12 test2 test1 => test1 test2 test12
+    "numeric_sort": false,
+```
+
+You can also sort tabs on every file open and save by enabling `sort_on_load_save` and specifying your desired sort plugin.
+
+```js
+    // Sort tabs when a file is opened or saved
+    "sort_on_load_save": false,
+```
+
+```js
+    // Sort module to use when sorting on load and save
+    //    "module": plugin that defines what view meta data is used to sort
+    //    "reverse": (optional) sort tabs in the reverse (true|false)
+    "sort_on_load_save_command": {"module": "TabsExtra.sort.name"}
+```
+
+### Customizing Sort Options
+You can control which sort options appear by adding or removing entries from the `sort_layout`.  You can also change their orders as `sort_layout` is a list that preserves order.  Each entry contains three keys:
+
+| Key     | Required | Description |
+|---------|----------|-------------|
+| Module  | Yes      | Path to sort module that is relative to Packages.  It is done in a python import style where `.` is used instead of `/`; also the `.py` extension is omitted. |
+| caption | Yes      | Caption gives the name that should be displayed in menus or the quick panel for the sort method. |
+| reverse | No       | Causes the sort to be returned in reverse order. |
 
 ```js
     // Define sort layout.  Each entry contains:
@@ -63,33 +126,17 @@ TabsExtra adds various sort options to the tab context menu.  You can control wh
         {"module": "TabsExtra.sort.syntax", "caption": "Syntax"},
         {"module": "TabsExtra.sort.reverse", "caption": "Reverse Order"}
     ],
-    // When sorting, normal strings will be sorted numerically.
-    //
-    // Example (non-numerical sort):
-    //   test12 test2 test1 => test1 test12 test2
-    //
-    // Example (numerical sort):
-    //   test12 test2 test1 => test1 test2 test12
-    "numeric_sort": false,
-
-    // Sort tabs when a file is opened or saved
-    "sort_on_load_save": false,
-
-    // Sort module to use when sorting on load and save
-    //    "module": plugin that defines what view meta data is used to sort
-    //    "reverse": (optional) sort tabs in the reverse (true|false)
-    "sort_on_load_save_command": {"module": "TabsExtra.sort.name"}
 ```
 
-Sort options are actually provided by small sort modules.  As seen above, sort modules are specified in the settings file like you are importing a python module.  The package folder would be the root of the module and would then be followed by the sub-folders and the actual module name; all would be separated with dots.  As shown above, TabsExtra comes with 9 different sort modules: name, path, modified, created, type, size, activated, syntax, reverse.  If these modules do not suit your needs, you can right your own.
+If these modules do not suit your needs, you can write your own.
 
-Within a sort module, there must be a run method as shown above below:
+Within a sort module, there must be a run method as shown below:
 
 def run(views, view_data)
 : 
     This function takes a list of `views` and an empty list to append sort data to.  The `view_data` is populated by the `run` function with arrays of formatted info that will be used to sort the tabs.  Info with the most importance should be appended first.
 
-    If you are dealing with strings that have numbers, and you wish to sort them numerically, you can import the numeric helper with the following import: `#!python from TabsExtra import tab_sort_helper as tsh`.  Once imported you can simply run your data through the `tab_sort_helper`: `#!python tsh.numeric_sort(dirname(v.file_name() if v.file_name() else '')`.
+    If you are dealing with strings that have numbers, and you wish to sort them numerically, you can import the numeric helper with the following import: `#!python from TabsExtra import tab_sort_helper as tsh`.  Once imported you can simply run your data through `tab_sort_helper`: `#!python tsh.numeric_sort(dirname(v.file_name() if v.file_name() else '')`.
 
     **Parameters**:
 
@@ -98,7 +145,7 @@ def run(views, view_data)
     | views     | List of Sublime view objects. |
     | view_data | An empty list that should be populated by the function with relevant sort data. |
 
-    Example module:
+    **Example**:
 
     ```python
     from os.path import dirname, basename
@@ -117,10 +164,7 @@ def run(views, view_data)
     ```
 
 ## Additional Menu Helper Commands
-TabsExtra also adds a number of other miscellaneous useful tab context commands that can open recently tabs, delete tabs from the disk, rename the current file, reveal the the tab's file in the sidebar or file manager, retrieve the file path, and revert unsaved changes.
-
-## Customize Tab Context Menu
-The tab menu adds a number of times.  Each item group can be re-ordered, or excluded if desired via the settings file.
+TabsExtra also adds a number of other miscellaneous useful commands in the tab context menu.  Many of which are already available in the quick panel.  You can control which ones show up in menu by configuring `menu_layout` in the settings file; you can even control the order.
 
 ```javascript
     // Menu layout include or exclude, in whatever order you desire, the following options:
