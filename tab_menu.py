@@ -168,7 +168,6 @@ OVERRIDE_MAP = {
 
 
 class TabsExtraMessageCommand(sublime_plugin.TextCommand):
-
     """Display Tabs Extra message for upgrade."""
 
     def run(self, edit):

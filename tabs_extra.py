@@ -161,7 +161,6 @@ def get_group_view(window, group, index):
 
 
 class Focus(object):
-
     """View focus handler."""
 
     win = None
@@ -221,7 +220,6 @@ class Focus(object):
 # Sticky Tabs
 ###############################
 class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
-
     """Clear all sticy tabs."""
 
     def run(self, group=-1, force=False):
@@ -253,7 +251,6 @@ class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
 
 
 class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
-
     """Toggle sticky state for tab."""
 
     def run(self, group=-1, index=-1):
@@ -279,7 +276,6 @@ class TabsExtraToggleStickyCommand(sublime_plugin.WindowCommand):
 
 
 class TabsExtraSetStickyCommand(sublime_plugin.TextCommand):
-
     """Set sticky value for the tab."""
 
     def run(self, edit, value):
@@ -303,7 +299,6 @@ class TabsExtraSetStickyCommand(sublime_plugin.TextCommand):
 # Close
 ###############################
 class TabsExtraCloseMenuCommand(sublime_plugin.WindowCommand):
-
     """Close tabs via a quick panel menu."""
 
     close_types = [
@@ -373,7 +368,6 @@ class TabsExtraCloseMenuCommand(sublime_plugin.WindowCommand):
 
 
 class TabsExtraCloseAllCommand(sublime_plugin.WindowCommand):
-
     """Close all tabs in the whole window."""
 
     def run(self):
@@ -387,7 +381,6 @@ class TabsExtraCloseAllCommand(sublime_plugin.WindowCommand):
 
 
 class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
-
     """Close tab command."""
 
     def init(self, close_type, group, index):
@@ -565,7 +558,6 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
 # Listener
 ###############################
 class TabsExtraListener(sublime_plugin.EventListener):
-
     """Listener command to handle tab focus, closing, moving events."""
 
     extra_command_call = False
@@ -824,7 +816,6 @@ class TabsExtraListener(sublime_plugin.EventListener):
 # Wrappers
 ###############################
 class TabsExtraViewWrapperCommand(sublime_plugin.WindowCommand):
-
     """Wrapper for for executing certain commands from the tab context menu."""
 
     def run(self, command, group=-1, index=-1, args={}):
@@ -841,7 +832,6 @@ class TabsExtraViewWrapperCommand(sublime_plugin.WindowCommand):
 # File Management Commands
 ###############################
 class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
-
     """Delete the file."""
 
     def run(self, group=-1, index=-1):
@@ -870,7 +860,6 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
 
 
 class TabsExtraDuplicateCommand(sublime_plugin.WindowCommand):
-
     """Duplicate tab."""
 
     def run(self, group=-1, index=-1):
@@ -925,7 +914,6 @@ class TabsExtraDuplicateCommand(sublime_plugin.WindowCommand):
 
 
 class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
-
     """Rename the tab's file."""
 
     def run(self, group=-1, index=-1):
@@ -972,7 +960,6 @@ class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
 
 
 class TabsExtraRevertCommand(TabsExtraViewWrapperCommand):
-
     """Revert changes in file."""
 
     def is_visible(self, command, group=-1, index=-1, args={}):
@@ -987,7 +974,6 @@ class TabsExtraRevertCommand(TabsExtraViewWrapperCommand):
 
 
 class TabsExtraFileCommand(TabsExtraViewWrapperCommand):
-
     """Wrapper for file commands."""
 
     def is_enabled(self, command, group=-1, index=-1, args={}):
@@ -1002,7 +988,6 @@ class TabsExtraFileCommand(TabsExtraViewWrapperCommand):
 
 
 class TabsExtraFilePathCommand(sublime_plugin.WindowCommand):
-
     """Get file paths."""
 
     def run(self, group=-1, index=-1, path_type='path'):
@@ -1033,7 +1018,6 @@ class TabsExtraFilePathCommand(sublime_plugin.WindowCommand):
 # Sort
 ###############################
 class TabsExtraSortMenuCommand(sublime_plugin.WindowCommand):
-
     """Sort tabs."""
 
     def run(self):
@@ -1062,7 +1046,6 @@ class TabsExtraSortMenuCommand(sublime_plugin.WindowCommand):
 
 
 class TabsExtraSortCommand(sublime_plugin.WindowCommand):
-
     """Sort tabs."""
 
     def run(self, group=-1, sort_by=None, reverse=False):
@@ -1114,7 +1097,6 @@ class TabsExtraSortCommand(sublime_plugin.WindowCommand):
 # Menu Installation
 ###############################
 class TabsExtraInstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
-
     """Install TabsExtra menu overriding the default tab context menu."""
 
     def run(self):
@@ -1126,7 +1108,6 @@ class TabsExtraInstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
 
 
 class TabsExtraUninstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
-
     """Uninstall the TabsExtra override menu."""
 
     def run(self):
@@ -1138,7 +1119,6 @@ class TabsExtraUninstallOverrideMenuCommand(sublime_plugin.ApplicationCommand):
 
 
 class TabsExtraInstallMenuCommand(sublime_plugin.ApplicationCommand):
-
     """Install the TabsExtra menu by appending it to the existing tab context menu."""
 
     def run(self):
