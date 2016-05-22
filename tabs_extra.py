@@ -520,6 +520,7 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
             if (
                 len(self.targets) and
                 not unsaved_prompt and
+                not all(not target.view().is_dirty() for target in self.targets) and
                 not sublime.ok_cancel_dialog(
                     "Are you sure you want to dismiss all targeted unsaved buffers?"
                 )
