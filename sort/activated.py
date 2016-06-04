@@ -1,7 +1,7 @@
 """
 Sort by tab activation.
 
-Copyright (c) 2014 - 2015 Isaac Muse <isaacmuse@gmail.com>
+Copyright (c) 2014 - 2016 Isaac Muse <isaacmuse@gmail.com>
 License: MIT
 """
 from os.path import basename
