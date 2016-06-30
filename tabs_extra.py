@@ -1073,8 +1073,9 @@ class TabsExtraSortCommand(sublime_plugin.WindowCommand):
         sorted_views = sorted(view_data, key=itemgetter(*indexes))
         if self.reverse:
             sorted_views = sorted_views[::-1]
-        for index in range(0, len(sorted_views)):
-            self.window.set_view_index(sorted_views[index][-1], self.group, index)
+        if sorted_views != view_data:
+            for index in range(0, len(sorted_views)):
+                self.window.set_view_index(sorted_views[index][-1], self.group, index)
 
     def get_sort_module(self, module_name):
         """Import the sort_by module."""
