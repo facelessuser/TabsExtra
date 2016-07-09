@@ -18,7 +18,7 @@ Sublime Plugin with sticky tabs, more tab closing options, tab sorting, and tab 
 - Keep active window focus on delete, or default to the last active, left, or right tab (user configurable).
 - Add open last tab, reveal in sidebar or finder, copy file path, save options, and revert.
 - Adds tab sorting options (based loosely on @bizoo's [SortTabs](https://github.com/bizoo/SortTabs) plugin).
-- Access clone, delete, rename, save, reveal, copy file path, revert, etc.
+- Access clone, delete, rename, move, save, reveal, copy file path, revert, etc.
 
 ## ST2 Support?
 Sorry, there are no plans for ST2 support.

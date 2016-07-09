@@ -10,7 +10,7 @@ import time
 import sys
 from TabsExtra import tab_menu
 from os.path import exists, split, splitext, join, normpath, basename, dirname, isdir
-from os import rename
+from os import rename, makedirs
 import functools
 from operator import itemgetter
 
@@ -948,6 +948,59 @@ class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
                 v.retarget(new)
         except Exception:
             sublime.status_message("Unable to rename")
+
+    def is_visible(self, group=-1, index=-1):
+        """Check if the command is visible."""
+
+        enabled = False
+        if group >= 0 and index >= 0:
+            view = get_group_view(self.window, group, index)
+            if view is not None and view.file_name() is not None and exists(view.file_name()):
+                enabled = True
+        return enabled
+
+
+class TabsExtraMoveCommand(sublime_plugin.WindowCommand):
+    """Move the tab's file."""
+
+    def run(self, group=-1, index=-1):
+        """Move the file in the given tab."""
+
+        if group >= 0 and index >= 0:
+            view = get_group_view(self.window, group, index)
+            if view is not None:
+                file_name = view.file_name()
+                if file_name is not None and exists(file_name):
+                    v = self.window.show_input_panel(
+                        "New Location:", file_name,
+                        functools.partial(self.on_done, file_name),
+                        None, None
+                    )
+                    file_path_len = len(file_name)
+                    file_name_len = len(basename(file_name))
+                    v.sel().clear()
+                    v.sel().add(
+                        sublime.Region(
+                            file_path_len - file_name_len,
+                            file_path_len
+                        )
+                    )
+
+    def on_done(self, old, new):
+        """Handle the moving when user is done with the input panel."""
+
+        try:
+            directory = dirname(new)
+            if not exists(directory):
+                makedirs(directory)
+
+            rename(old, new)
+
+            v = self.window.find_open_file(old)
+            if v:
+                v.retarget(new)
+        except Exception:
+            sublime.status_message("Unable to move")
 
     def is_visible(self, group=-1, index=-1):
         """Check if the command is visible."""

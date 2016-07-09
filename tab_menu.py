@@ -13,9 +13,9 @@ import json
 from .lib.file_strip.json import sanitize_json
 import codecs
 
-__format__ = "1.5.0"
+__format__ = "1.6.0"
 __changes__ = [
-    "Add 'Duplicate' and 'Copy File Name' command"
+    "Add 'Move' command"
 ]
 
 PACKAGE_NAME = "TabsExtra"
@@ -123,6 +123,7 @@ DELETE_OPTIONS = '''    { "caption": "-" },
 
 RENAME_OPTIONS = '''    { "caption": "-" },
     { "command": "tabs_extra_rename", "args": {"group": -1, "index": -1}, "caption": "Rename…" },
+    { "command": "tabs_extra_move", "args": {"group": -1, "index": -1}, "caption": "Move…" },
     { "command": "tabs_extra_duplicate", "args": {"group": -1, "index": -1}, "caption": "Duplicate…" }'''
 
 SORT_OPTIONS = '''    { "caption": "-" },

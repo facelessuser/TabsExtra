@@ -1,4 +1,5 @@
 [![Unix Build Status][travis-image]][travis-link]
+[![Package Control Downloads][pc-image]][pc-link]
 ![License][license-image]
 # TabsExtra
 Sublime Plugin with sticky tabs, more tab closing options, tab sorting, and tab access to cloning, deleting, renaming etc.
@@ -15,7 +16,7 @@ Sublime Plugin with sticky tabs, more tab closing options, tab sorting, and tab 
 - Keep active window focus on delete, or default to the last active, left, or right tab (user configurable).
 - Add open last tab, reveal in sidebar or finder, copy file path, save options, and revert.
 - Adds tab sorting options (based loosely on @bizoo's [SortTabs](https://github.com/bizoo/SortTabs) plugin).
-- Access clone, delete, rename, save, reveal, copy file path, revert, etc.
+- Access clone, delete, rename, move, save, reveal, copy file path, revert, etc.
 
 # ST2 Support?
 Sorry, there are no plans for ST2 support.
@@ -37,4 +38,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 [travis-image]: https://img.shields.io/travis/facelessuser/TabsExtra/master.svg
 [travis-link]: https://travis-ci.org/facelessuser/TabsExtra
+[pc-image]: https://img.shields.io/packagecontrol/dt/TabsExtra.svg
+[pc-link]: https://packagecontrol.io/packages/TabsExtra
 [license-image]: https://img.shields.io/badge/license-MIT-blue.svg
