@@ -1,13 +1,10 @@
 [
     {
-        "caption": "Preferences",
-        "mnemonic": "n",
         "id": "preferences",
         "children":
         [
             {
                 "caption": "Package Settings",
-                "mnemonic": "P",
                 "id": "package-settings",
                 "children":
                 [
@@ -42,6 +39,11 @@
                             {
                                 "command": "tabs_extra_uninstall_override_menu",
                                 "caption": "Uninstall Default Override Menu"
+                            },
+                            { "caption": "-" },
+                            {
+                                "caption": "Support Info",
+                                "command": "tabs_extra_support_info"
                             },
                             { "caption": "-" }
                         ]
