@@ -699,6 +699,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
         view_info = view.settings().get("tabs_extra_view_info", None)
         window_info = view.settings().get("tabs_extra_window_info", None)
         if view_info is not None and window_info is not None:
+            window = None
             for w in sublime.windows():
                 if w.id() == window_info:
                     window = w
