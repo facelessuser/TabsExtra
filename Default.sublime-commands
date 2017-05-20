@@ -31,5 +31,9 @@
         "caption": "TabsExtra: Close Tabs (Dismiss Unsaved)",
         "command": "tabs_extra_close_menu",
         "args": {"mode": "dismiss_unsaved"}
+    },
+    {
+        "caption": "TabsExtra: Copy Support Info",
+        "command": "tabs_extra_support_info"
     }
 ]
