@@ -1,6 +1,6 @@
 # TabsExtra 1.4.0
 
-> Released May 28, 2017
+> Released May 29, 2017
 
 - **NEW**: New support commands.
 - **NEW**: Use latest settings API when viewing settings.
