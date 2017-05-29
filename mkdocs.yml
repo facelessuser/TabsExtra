@@ -2,27 +2,72 @@ site_name: TabsExtra Documentation
 repo_url: https://github.com/facelessuser/TabsExtra
 site_description: Sublime Plugin with sticky tabs, more tab closing options, and additional menu items.
 copyright: Copyright &copy; 2014 - 2015 <a href="https://github.com/facelessuser">Isaac Muse</a>
+
 pages:
-  - About TabsExtra: index.md
   - Installation: installation.md
-  - User Guide: usage.md
+  - User Guide: index.md
   - Contributing &amp; Support: contributing.md
   - License: license.md
-theme: readthedocs
-theme_dir: doc_theme
+
+theme: material
+docs_dir: docs/src/markdown
+theme_dir: docs/theme
+
 markdown_extensions:
-  - markdown.extensions.admonition
-  - markdown.extensions.smarty
-  - markdown.extensions.nl2br
-  - markdown.extensions.codehilite:
-      guess_lang: false
-  - pymdownx.extra
-  - pymdownx.inlinehilite
-  - pymdownx.magiclink
-  - pymdownx.tilde
-  - pymdownx.caret
-  - pymdownx.smartsymbols
-  - pymdownx.githubemoji
-  - pymdownx.tasklist
-  - pymdownx.progressbar
-  - pymdownx.headeranchor
+  - markdown.extensions.toc:
+      slugify: !!python/name:pymdownx.slugs.uslugify
+      permalink: 
+  - markdown.extensions.admonition:
+  - markdown.extensions.smarty:
+      smart_quotes: false
+  - pymdownx.betterem:
+  - markdown.extensions.attr_list:
+  - markdown.extensions.def_list:
+  - markdown.extensions.tables:
+  - markdown.extensions.abbr:
+  - pymdownx.extrarawhtml:
+  - pymdownx.superfences:
+  - pymdownx.highlight:
+      css_class: codehilite
+      extend_pygments_lang:
+        - name: php-inline
+          lang: php
+          options:
+            startinline: true
+  - pymdownx.inlinehilite:
+  - pymdownx.magiclink:
+      repo_url_shortener: true
+      base_repo_url: https://github.com/facelessuser/TabsExtra
+  - pymdownx.tilde:
+  - pymdownx.caret:
+  - pymdownx.smartsymbols:
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_png
+  - pymdownx.escapeall:
+      hardbreak: true
+      nbsp: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.progressbar:
+  - pymdownx.plainhtml:
+      strip_attributes: ''
+  - pymdownx.snippets:
+      base_path: docs/src/markdown/_snippets
+  - pymdownx.keys:
+      separator: ＋
+  - pymdownx.spoilers:
+
+extra:
+  palette:
+    primary: blue
+    accent: blue
+  font:
+    text: Roboto
+    code: Roboto Mono
+  social:
+    - type: github
+      link: https://github.com/facelessuser
+extra_css:
+  - extra-effadd97dd.css
+extra_javascript:
+  - extra-0d49409391.js

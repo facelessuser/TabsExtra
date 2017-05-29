@@ -13,18 +13,11 @@
                         "children":
                         [
                             {
-                                "command": "open_file", "args":
-                                {
-                                    "file": "${packages}/TabsExtra/tabs_extra.sublime-settings"
+                                "command": "edit_settings", "args": {
+                                    "base_file": "${packages}/TabsExtra/tabs_extra.sublime-settings",
+                                    "default": "{\n$0\n}\n"
                                 },
-                                "caption": "Settings – Default"
-                            },
-                            {
-                                "command": "open_file", "args":
-                                {
-                                    "file": "${packages}/User/tabs_extra.sublime-settings"
-                                },
-                                "caption": "Settings – User"
+                                "caption": "Settings"
                             },
                             { "caption": "-" },
                             {
@@ -42,10 +35,28 @@
                             },
                             { "caption": "-" },
                             {
+                                "caption": "Changelog",
+                                "command": "tabs_extra_changes"
+                            },
+                            {
+                                "caption": "Documentation",
+                                "command": "tabs_extra_open_site",
+                                "args": {
+                                    "url": "http://facelessuser.github.io/TabsExtra/"
+                                }
+                            },
+                            { "caption": "-" },
+                            {
                                 "caption": "Support Info",
                                 "command": "tabs_extra_support_info"
                             },
-                            { "caption": "-" }
+                            {
+                                "caption": "Issues",
+                                "command": "tabs_extra_open_site",
+                                "args": {
+                                    "url": "https://github.com/facelessuser/TabsExtra/issues"
+                                }
+                            }
                         ]
                     }
                 ]

@@ -2,9 +2,10 @@
 [![Package Control Downloads][pc-image]][pc-link]
 ![License][license-image]
 # TabsExtra
+
 Sublime Plugin with sticky tabs, more tab closing options, tab sorting, and tab access to cloning, deleting, renaming etc.
 
-<img src="https://dl.dropboxusercontent.com/u/342698/TabsExtra/Menu.png" border="0"/>
+![Menu](docs/src/markdown/images/TabsExtra/Menu.png)
 
 # Features
 
@@ -18,17 +19,15 @@ Sublime Plugin with sticky tabs, more tab closing options, tab sorting, and tab 
 - Adds tab sorting options (based loosely on @bizoo's [SortTabs](https://github.com/bizoo/SortTabs) plugin).
 - Access clone, delete, rename, move, save, reveal, copy file path, revert, etc.
 
-# ST2 Support?
-Sorry, there are no plans for ST2 support.
-
 # Documentation
+
 http://facelessuser.github.io/TabsExtra/
 
 # License
 
 TabsExtra is released under the MIT license.
 
-Copyright (c) 2014 - 2016 Isaac Muse <isaacmuse@gmail.com>
+Copyright (c) 2014 - 2017 Isaac Muse <isaacmuse@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

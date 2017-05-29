@@ -1,7 +1,20 @@
-# User Guide {: .doctitle}
-Configuration and usage of TabsExtra.
+# User Guide
 
----
+## Overview
+
+Sublime Plugin with sticky tabs, more tab closing options, tab sorting, and tab access to cloning, deleting, renaming etc.
+
+![Menu](images/Menu.png)
+
+- Adds `Close Tabs to the Left` for the current group.
+- Adds `Close All Tabs` for the current group.
+- Adds `Sticky Tabs` that allows a user select certain tabs that will not close when a tab close command is issued.
+- Adds variants of the close commands to skip unsaved files, or to dismiss saved files with no prompt.
+- Overrides the built-in tab commands and 'close' and 'close_all' commands to work with sticky tabs.
+- Keep active window focus on delete, or default to the last active, left, or right tab (user configurable).
+- Add open last tab, reveal in sidebar or finder, copy file path, save options, and revert.
+- Adds tab sorting options (based loosely on @bizoo's [SortTabs][sorttabs] plugin).
+- Access clone, delete, rename, move, save, reveal, copy file path, revert, etc.
 
 ## General Usage
 Using TabsExtra is very straight forward once the menu is created.  TabsExtra will update the right click context menu of tabs with various useful features.  It also overrides a couple of Sublime's commands to allow for various improvements in relation to tab closing, tab focus when closing files, and tab position when opening files.
@@ -104,11 +117,11 @@ You can also sort tabs on every file open and save by enabling `sort_on_load_sav
 ### Customizing Sort Options
 You can control which sort options appear by adding or removing entries from the `sort_layout`.  You can also change their orders as `sort_layout` is a list that preserves order.  Each entry contains three keys:
 
-| Key     | Required | Description |
-|---------|----------|-------------|
-| Module  | Yes      | Path to sort module that is relative to Packages.  It is done in a python import style where `.` is used instead of `/`; also the `.py` extension is omitted. |
-| caption | Yes      | Caption gives the name that should be displayed in menus or the quick panel for the sort method. |
-| reverse | No       | Causes the sort to be returned in reverse order. |
+Key       | Required | Description
+--------- | -------- | -----------
+`module`  | Yes      | Path to sort module that is relative to Packages.  It is done in a python import style where `.` is used instead of `/`; also the `.py` extension is omitted.
+`caption` | Yes      | Caption gives the name that should be displayed in menus or the quick panel for the sort method.
+`reverse` | No       | Causes the sort to be returned in reverse order.
 
 ```js
     // Define sort layout.  Each entry contains:
@@ -140,10 +153,10 @@ def run(views, view_data)
 
     **Parameters**:
 
-    | Parameter | Description |
-    |-----------|-------------|
-    | views     | List of Sublime view objects. |
-    | view_data | An empty list that should be populated by the function with relevant sort data. |
+    Parameter   | Description
+    ----------- | -----------
+    `views`     | List of Sublime view objects.
+    `view_data` | An empty list that should be populated by the function with relevant sort data.
 
     **Example**:
 
@@ -166,10 +179,12 @@ def run(views, view_data)
 ## Additional Menu Helper Commands
 TabsExtra also adds a number of other miscellaneous useful commands in the tab context menu.  Many of which are already available in the quick panel.  You can control which ones show up in menu by configuring `menu_layout` in the settings file; you can even control the order.
 
-```javascript
+```js
     // Menu layout include or exclude, in whatever order you desire, the following options:
     // ["close", "sticky", "open", "clone", "save", "delete", "rename", "reveal", "path", "revert", "sort"]
     // When done, go to Preferences->Package Settings->TabsExtra and Install/Upgrade either
     // the default TabsMenu or the Override Menu which overrides the "Default" package's menu.
     "menu_layout": ["close", "sticky", "open", "clone", "save", "delete", "rename", "reveal", "path", "revert", "sort"],
 ```
+
+--8<-- "refs.md"
