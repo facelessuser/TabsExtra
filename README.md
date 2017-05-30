@@ -5,7 +5,7 @@
 
 Sublime Plugin with sticky tabs, more tab closing options, tab sorting, and tab access to cloning, deleting, renaming etc.
 
-![Menu](docs/src/markdown/images/TabsExtra/Menu.png)
+![Menu](docs/src/markdown/images/Menu.png)
 
 # Features
 
