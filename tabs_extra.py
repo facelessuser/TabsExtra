@@ -13,6 +13,7 @@ from os.path import exists, split, splitext, join, normpath, basename, dirname, 
 from os import rename, makedirs
 import functools
 from operator import itemgetter
+import sublime_api
 
 SHEET_WORKAROUND = int(sublime.version()) < 3068
 CUSTOM_OPEN_FOCUS = int(sublime.version()) >= 3068
@@ -534,18 +535,19 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
                 else:
                     v = s.view()
                 if v is not None:
-                    if not v.settings().get("tabs_extra_sticky", False) or close_type == "single":
+                    if not v.settings().get("tabs_extra_sticky", False):
                         if not self.persistent:
                             v.settings().erase("tabs_extra_sticky")
                         self.window.focus_view(v)
                         if not v.is_dirty() or close_unsaved:
                             if not unsaved_prompt:
                                 v.set_scratch(True)
-                            self.window.run_command("close_file")
+                            sublime_api.window_close_file(self.window.id(), v.id())
                     elif not self.persistent:
                         v.settings().erase("tabs_extra_sticky")
                 else:
-                    self.window.run_command("close_file")
+                    self.window.focus_sheet(s)
+                    self.window.run_command('close_file')
 
             if not self.persistent and self.cleanup:
                 self.window.run_command("tabs_extra_clear_all_sticky", {"group": group})
@@ -578,6 +580,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
             if extra_command_call and command_name == "close_file":
                 view.settings().set("tabs_extra_closing", True)
                 return cmd
+            command_name = "tabs_extra_close"
             group, index = window.get_view_index(view)
             args = {"group": group, "index": index}
         if command_name in ["close_by_index", "close"]:
