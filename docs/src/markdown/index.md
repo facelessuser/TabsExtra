@@ -8,7 +8,7 @@ Sublime Plugin with sticky tabs, more tab closing options, tab sorting, and tab 
 
 - Adds `Close Tabs to the Left` for the current group.
 - Adds `Close All Tabs` for the current group.
-- Adds `Sticky Tabs` that allows a user select certain tabs that will not close when a tab close command is issued.
+- Adds `Sticky Tabs` that allows a user to select certain tabs that will not close when a tab close command is issued.
 - Adds variants of the close commands to skip unsaved files, or to dismiss saved files with no prompt.
 - Overrides the built-in tab commands and 'close' and 'close_all' commands to work with sticky tabs.
 - Keep active window focus on delete, or default to the last active, left, or right tab (user configurable).
@@ -17,25 +17,32 @@ Sublime Plugin with sticky tabs, more tab closing options, tab sorting, and tab 
 - Access clone, delete, rename, move, save, reveal, copy file path, revert, etc.
 
 ## General Usage
+
 Using TabsExtra is very straight forward once the menu is created.  TabsExtra will update the right click context menu of tabs with various useful features.  It also overrides a couple of Sublime's commands to allow for various improvements in relation to tab closing, tab focus when closing files, and tab position when opening files.
 
 ## Install/Upgrade Menu
+
 When first installing TabsExtra, you need to Install the new menu; this does not happen automatically.  Go to `Preferences->Package Settings->TabsExtra` and Install/Upgrade either the **basic** tab menu or the **override** menu. The **basic** menu's commands won't be grouped together with the built-in options because of the way Sublime Text's menus are managed.  But the **override** menu overrides the **Default** Package's tab context menu for sane, clean grouping of the commands.
 
 ## Which Commands does TabsExtra Override and Why?
-TabsExtra does **not** override `close_file`, but it does override the following to enhance tab closing behavior:
 
-- `close_by_index`: close view from tab
-- `close`: close active view from global menu
-- `close_all`: close all tabs in all groups
-- `close_others_by_index`: close other tabs in current group
-- `close_to_right_by_index` close tabs to right in current group
+TabsExtra overrides all close commands that it can.  The only one it does not override is when the close button on a tab is clicked as that seems to side step the override API and cannot be intercepted.
+
+TabsExtra intercepts the close commands in order to provide enhanced close options. Here are all the intercepted commands:
+
+- `close_file`: Close called with a specific window and view id.
+- `close_by_index`: Close view from tab.
+- `close`: Close active view from global menu.
+- `close_all`: Close all tabs in all groups.
+- `close_others_by_index`: Close other tabs in current group.
+- `close_to_right_by_index` Close tabs to right in current group.
 
 This allows TabsExtra do special things like ignore certain tabs, focus a specific tab after closing tab(s), force close without prompting the user if they want to save for every unsaved tab, or even skip unsaved tabs when closing.
 
 TabsExtra **cannot** override the tab close button.  But it should be able to predict when it is pressed, and focus the appropriate window after the close.
 
 ## New Close Options
+
 TabsExtra expands how many close options there are in the tab context menu.  It also makes them available in the quick panel as well.
 
 - Close.
@@ -47,7 +54,11 @@ TabsExtra expands how many close options there are in the tab context menu.  It 
 And TabsExtra also provides variants that will force close unsaved tabs without annoying the user with a prompt for every unsaved tab.  It also provides variants to simply skip unsaved tabs.
 
 ## Sticky Tabs
-TabsExtra allows users to make a tab *sticky*.  This allows the tab to not close when a bulk `close` operation is performed.  By default, after any `close` command is run, the *sticky* tab properties are forgotten.  You can make a tab's stickiness persist by enabling [persistent_sticky](#persistent_sticky).
+
+TabsExtra allows users to mark a tab *sticky*.  This allows the tab to not close when a `close` operation is performed.  By default, after any `close` command is run, the *sticky* tab properties are forgotten.  You can make a tab's stickiness persist by enabling [persistent_sticky](#persistent_sticky).
+
+!!! warning "Warning"
+    TabsExtra overrides all close commands except when the user clicks the close button on a tab as this seems to be impossible to override. If this is problematic, you can disable the tab close button by disabling `show_tab_close_buttons` in your `Preferences.sublime-settings` file to prevent accidental clicking.
 
 ```js
     // By default TabsExtra forgets a tab's "stickiness" when
@@ -59,6 +70,7 @@ TabsExtra allows users to make a tab *sticky*.  This allows the tab to not close
 A tab's stickiness can be controlled either the context menu or the quick panel.
 
 ## Tab Focus After Close
+
 By default TabsExtra keeps the current active tab focused, but if the active tab gets deleted, TabsExtra will default to either the left, right, or last active tab (depending how the user has it set).
 
 ```javascript
@@ -67,6 +79,7 @@ By default TabsExtra keeps the current active tab focused, but if the active tab
 ```
 
 ## Tab Spawn Position
+
 TabsExtra can control where a new window is opened with the `spawn_view` settings option.
 
 ```js
@@ -75,6 +88,7 @@ TabsExtra can control where a new window is opened with the `spawn_view` setting
 ```
 
 ## Tab Sort
+
 TabsExtra adds various sort options to the tab context menu and quick panel.
 
 - Sort by name.
@@ -115,6 +129,7 @@ You can also sort tabs on every file open and save by enabling `sort_on_load_sav
 ```
 
 ### Customizing Sort Options
+
 You can control which sort options appear by adding or removing entries from the `sort_layout`.  You can also change their orders as `sort_layout` is a list that preserves order.  Each entry contains three keys:
 
 Key       | Required | Description
@@ -177,6 +192,7 @@ def run(views, view_data)
     ```
 
 ## Additional Menu Helper Commands
+
 TabsExtra also adds a number of other miscellaneous useful commands in the tab context menu.  Many of which are already available in the quick panel.  You can control which ones show up in menu by configuring `menu_layout` in the settings file; you can even control the order.
 
 ```js

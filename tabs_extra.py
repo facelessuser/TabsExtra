@@ -507,6 +507,19 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
                 selected = self.select_left()
         return selected
 
+    def can_close(self, is_sticky, is_single):
+        """Prompt user in certain scenarios if okay to close."""
+
+        is_okay = True
+        if is_sticky:
+            if is_single:
+                is_okay = sublime.ok_cancel_dialog(
+                    "This is a sticky tab, are you sure you want to close?"
+                )
+            else:
+                is_okay = False
+        return is_okay
+
     def run(
         self, group=-1, index=-1,
         close_type="single", unsaved_prompt=True, close_unsaved=True
@@ -535,7 +548,7 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
                 else:
                     v = s.view()
                 if v is not None:
-                    if not v.settings().get("tabs_extra_sticky", False):
+                    if self.can_close(v.settings().get("tabs_extra_sticky", False), close_type == "single"):
                         if not self.persistent:
                             v.settings().erase("tabs_extra_sticky")
                         self.window.focus_view(v)
