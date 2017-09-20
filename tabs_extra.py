@@ -49,8 +49,9 @@ Are you sure you want to continue?
 ###############################
 def path2url(path):
     """
-        Convert a filename to a file:// URL
-        https://stackoverflow.com/questions/11687478/convert-a-filename-to-a-file-url
+    Convert a filename to a file:// URL.
+
+    https://stackoverflow.com/questions/11687478/convert-a-filename-to-a-file-url
     """
     return urljoin('file:', pathname2url(path))
 
@@ -1084,7 +1085,7 @@ class TabsExtraFilePathCommand(sublime_plugin.WindowCommand):
                 if path_type == 'name':
                     pth = basename(pth)
                 elif path_type == 'path_uri':
-                    pth = path2url( pth )
+                    pth = path2url(pth)
                 sublime.set_clipboard(pth)
 
     def is_enabled(self, group=-1, index=-1, path_type='path'):
