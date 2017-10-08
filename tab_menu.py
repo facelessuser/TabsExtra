@@ -110,8 +110,9 @@ PATH_OPTIONS = '''    {
         "caption": "Copy File Path",
         "children":
         [
+            { "command": "tabs_extra_file_path", "args": {"group": -1, "index": -1, "path_type": "name"}, "caption": "File Name" },
+            { "command": "tabs_extra_file_path", "args": {"group": -1, "index": -1, "path_type": "path_uri"}, "caption": "File URI" },
             { "command": "tabs_extra_file_path", "args": {"group": -1, "index": -1, "path_type": "path"}, "caption": "Full Path" },
-            { "command": "tabs_extra_file_path", "args": {"group": -1, "index": -1, "path_type": "name"}, "caption": "File Name" }
         ]
     }'''  # noqa
 

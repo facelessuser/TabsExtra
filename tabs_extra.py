@@ -15,6 +15,9 @@ import functools
 from operator import itemgetter
 import sublime_api
 
+from urllib.parse import urljoin
+from urllib.request import pathname2url
+
 SHEET_WORKAROUND = int(sublime.version()) < 3068
 CUSTOM_OPEN_FOCUS = int(sublime.version()) >= 3068
 
@@ -1081,6 +1084,8 @@ class TabsExtraFilePathCommand(sublime_plugin.WindowCommand):
                 pth = sublime.get_clipboard()
                 if path_type == 'name':
                     pth = basename(pth)
+                elif path_type == 'path_uri':
+                    pth = urljoin('file:', pathname2url(pth))
                 sublime.set_clipboard(pth)
 
     def is_enabled(self, group=-1, index=-1, path_type='path'):
