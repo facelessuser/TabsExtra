@@ -4,7 +4,7 @@
     // "Stickiness" persist by enabling the following feature.
     "persistent_sticky": false,
 
-    // If active window gets closed, default to (left|right|last_active)
+    // If active view gets closed, select by default the (left|right|last_active) view
     "fallback_focus": "right",
 
     // Experimental: When opening a view, where should it be spawned at (none|left|active_left|active_right|right)
