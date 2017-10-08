@@ -836,8 +836,11 @@ class TabsExtraListener(sublime_plugin.EventListener):
 class TabsExtraViewWrapperCommand(sublime_plugin.WindowCommand):
     """Wrapper for for executing certain commands from the tab context menu."""
 
-    def run(self, command, group=-1, index=-1, args={}):
+    def run(self, command, group=-1, index=-1, args=None):
         """Wrap command in order to ensure view gets focused first."""
+
+        if args is None:
+            args = {}
 
         if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
@@ -1033,8 +1036,11 @@ class TabsExtraMoveCommand(sublime_plugin.WindowCommand):
 class TabsExtraRevertCommand(TabsExtraViewWrapperCommand):
     """Revert changes in file."""
 
-    def is_visible(self, command, group=-1, index=-1, args={}):
+    def is_visible(self, command, group=-1, index=-1, args=None):
         """Determine if command should be visible in menu."""
+
+        if args is None:
+            args = {}
 
         enabled = False
         if group >= 0 and index >= 0:
@@ -1047,8 +1053,11 @@ class TabsExtraRevertCommand(TabsExtraViewWrapperCommand):
 class TabsExtraFileCommand(TabsExtraViewWrapperCommand):
     """Wrapper for file commands."""
 
-    def is_enabled(self, command, group=-1, index=-1, args={}):
+    def is_enabled(self, command, group=-1, index=-1, args=None):
         """Determine if command should be enabled."""
+
+        if args is None:
+            args = {}
 
         enabled = False
         if group >= 0 and index >= 0:
