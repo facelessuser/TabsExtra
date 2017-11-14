@@ -160,7 +160,7 @@ If these modules do not suit your needs, you can write your own.
 
 Within a sort module, there must be a run method as shown below:
 
-def run(views, view_data)
+`#!py3 def run(views, view_data)`
 : 
     This function takes a list of `views` and an empty list to append sort data to.  The `view_data` is populated by the `run` function with arrays of formatted info that will be used to sort the tabs.  Info with the most importance should be appended first.
 
@@ -175,7 +175,7 @@ def run(views, view_data)
 
     **Example**:
 
-    ```python
+    ```py3
     from os.path import dirname, basename
     from TabsExtra import tab_sort_helper as tsh
 
