@@ -31,5 +31,20 @@
         "caption": "TabsExtra: Close Tabs (Dismiss Unsaved)",
         "command": "tabs_extra_close_menu",
         "args": {"mode": "dismiss_unsaved"}
+    },
+    {
+        "caption": "TabsExtra: Settings",
+        "command": "edit_settings",
+        "args": {
+            "base_file": "${packages}/TabsExtra/tabs_extra.sublime-settings",
+            "default": "{\n$0\n}\n"
+        }
+    },
+    {
+        "caption": "TabsExtra: Documentation",
+        "command": "tabs_extra_open_site",
+        "args": {
+            "url": "http://facelessuser.github.io/TabsExtra/"
+        }
     }
 ]
