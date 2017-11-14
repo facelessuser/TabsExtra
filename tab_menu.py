@@ -15,7 +15,7 @@ import codecs
 
 __format__ = "1.7.0"
 __changes__ = [
-    "Add 'Move' command"
+    "Add 'Path URI' copy command"
 ]
 
 PACKAGE_NAME = "TabsExtra"
