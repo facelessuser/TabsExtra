@@ -42,3 +42,4 @@ deploy:
     on:
       tags: true
       repo: facelessuser/TabsExtra
+      condition: "$TOXENV = documents"
