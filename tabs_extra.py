@@ -9,17 +9,13 @@ import sublime
 import time
 import sys
 from TabsExtra import tab_menu
-from os.path import exists, split, splitext, join, normpath, basename, dirname, isdir
-from os import rename, makedirs
+import os
 import functools
 from operator import itemgetter
 import sublime_api
 
 from urllib.parse import urljoin
 from urllib.request import pathname2url
-
-SHEET_WORKAROUND = int(sublime.version()) < 3068
-CUSTOM_OPEN_FOCUS = int(sublime.version()) >= 3068
 
 SETTINGS = "tabs_extra.sublime-settings"
 
@@ -141,25 +137,9 @@ def timestamp_view(window, sheet):
 def get_group_view(window, group, index):
     """Get the view at the given index in the given group."""
 
-    if SHEET_WORKAROUND:
-        active_sheet = window.active_sheet()
-        protect_focus = False
-        if TabsExtraListener.extra_command_call is False:
-            TabsExtraListener.extra_command_call = True
-            protect_focus = True
-
     sheets = window.sheets_in_group(int(group))
     sheet = sheets[index] if index < len(sheets) else None
-
-    if SHEET_WORKAROUND:
-        if sheet is not None:
-            window.focus_sheet(sheet)
-            view = window.active_view()
-        window.focus_sheet(active_sheet)
-        if protect_focus:
-            TabsExtraListener.extra_command_call = False
-    else:
-        view = sheet.view() if sheet is not None else None
+    view = sheet.view() if sheet is not None else None
 
     return view
 
@@ -414,11 +394,7 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
         self.last_activated = []
         if get_fallback_direction() == LAST:
             for s in self.sheets:
-                if SHEET_WORKAROUND:
-                    self.window.focus_sheet(s)
-                    v = self.window.active_view()
-                else:
-                    v = s.view()
+                v = s.view()
                 if v is not None:
                     last_activated = v.settings().get("tabs_extra_last_activated", None)
                     if last_activated is not None:
@@ -545,11 +521,7 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
                 return
 
             for s in self.targets:
-                if SHEET_WORKAROUND:
-                    self.window.focus_sheet(s)
-                    v = self.window.active_view()
-                else:
-                    v = s.view()
+                v = s.view()
                 if v is not None:
                     if self.can_close(v.settings().get("tabs_extra_sticky", False), close_type == "single"):
                         if not self.persistent:
@@ -626,8 +598,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
             if not self.on_sort(view):
                 view.settings().set('tabsextra_to_sort', True)
         else:
-            if CUSTOM_OPEN_FOCUS:
-                self.on_spawn(view)
+            self.on_spawn(view)
 
     def on_spawn(self, view):
         """When a new view is spawned, postion the view per user's preference."""
@@ -789,11 +760,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
         selected = False
         last_activated = []
         for s in sheets:
-            if SHEET_WORKAROUND:
-                window.focus_sheet(s)
-                v = window.active_view()
-            else:
-                v = s.view()
+            v = s.view()
             if v is not None:
                 last = v.settings().get("tabs_extra_last_activated", None)
                 if last is not None:
@@ -865,7 +832,7 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
             view = get_group_view(self.window, group, index)
             if view is not None:
                 file_name = view.file_name()
-                if file_name is not None and exists(file_name):
+                if file_name is not None and os.path.exists(file_name):
                     if sublime.ok_cancel_dialog("Delete %s?" % file_name, "Delete"):
                         if not view.close():
                             return
@@ -878,7 +845,7 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
         enabled = False
         if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
-            if view is not None and view.file_name() is not None and exists(view.file_name()):
+            if view is not None and view.file_name() is not None and os.path.exists(view.file_name()):
                 enabled = True
         return enabled
 
@@ -893,14 +860,14 @@ class TabsExtraDuplicateCommand(sublime_plugin.WindowCommand):
             view = get_group_view(self.window, group, index)
             if view is not None:
                 file_name = view.file_name()
-                if file_name is not None and exists(file_name):
+                if file_name is not None and os.path.exists(file_name):
                     v = self.window.show_input_panel(
                         "Duplicate:", file_name,
                         lambda x: self.on_done(file_name, x),
                         None, None
                     )
                     file_path_len = len(file_name)
-                    file_name_len = len(basename(file_name))
+                    file_name_len = len(os.path.basename(file_name))
                     v.sel().clear()
                     v.sel().add(
                         sublime.Region(
@@ -912,9 +879,9 @@ class TabsExtraDuplicateCommand(sublime_plugin.WindowCommand):
     def on_done(self, old, new):
         """Handle the tab duplication when the user is done with the input panel."""
 
-        new_path = dirname(new)
-        if exists(new_path) and isdir(new_path):
-            if not exists(new) or sublime.ok_cancel_dialog("Overwrite %s?" % new, "Replace"):
+        new_path = os.path.dirname(new)
+        if os.path.exists(new_path) and os.path.isdir(new_path):
+            if not os.path.exists(new) or sublime.ok_cancel_dialog("Overwrite %s?" % new, "Replace"):
                 try:
                     with open(old, 'rb') as f:
                         text = f.read()
@@ -932,7 +899,7 @@ class TabsExtraDuplicateCommand(sublime_plugin.WindowCommand):
         enabled = False
         if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
-            if view is not None and view.file_name() is not None and exists(view.file_name()):
+            if view is not None and view.file_name() is not None and os.path.exists(view.file_name()):
                 enabled = True
         return enabled
 
@@ -947,24 +914,24 @@ class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
             view = get_group_view(self.window, group, index)
             if view is not None:
                 file_name = view.file_name()
-                if file_name is not None and exists(file_name):
-                    branch, leaf = split(file_name)
+                if file_name is not None and os.path.exists(file_name):
+                    branch, leaf = os.path.split(file_name)
                     v = self.window.show_input_panel(
                         "New Name:", leaf,
                         functools.partial(self.on_done, file_name, branch),
                         None, None
                     )
-                    name = splitext(leaf)[0]
+                    name = os.path.splitext(leaf)[0]
                     v.sel().clear()
                     v.sel().add(sublime.Region(0, len(name)))
 
     def on_done(self, old, branch, leaf):
         """Handle the renaming when user is done with the input panel."""
 
-        new = join(branch, leaf)
+        new = os.path.join(branch, leaf)
 
         try:
-            rename(old, new)
+            os.rename(old, new)
 
             v = self.window.find_open_file(old)
             if v:
@@ -978,7 +945,7 @@ class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
         enabled = False
         if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
-            if view is not None and view.file_name() is not None and exists(view.file_name()):
+            if view is not None and view.file_name() is not None and os.path.exists(view.file_name()):
                 enabled = True
         return enabled
 
@@ -993,14 +960,14 @@ class TabsExtraMoveCommand(sublime_plugin.WindowCommand):
             view = get_group_view(self.window, group, index)
             if view is not None:
                 file_name = view.file_name()
-                if file_name is not None and exists(file_name):
+                if file_name is not None and os.path.exists(file_name):
                     v = self.window.show_input_panel(
                         "New Location:", file_name,
                         functools.partial(self.on_done, file_name),
                         None, None
                     )
                     file_path_len = len(file_name)
-                    file_name_len = len(basename(file_name))
+                    file_name_len = len(os.path.basename(file_name))
                     v.sel().clear()
                     v.sel().add(
                         sublime.Region(
@@ -1013,11 +980,11 @@ class TabsExtraMoveCommand(sublime_plugin.WindowCommand):
         """Handle the moving when user is done with the input panel."""
 
         try:
-            directory = dirname(new)
-            if not exists(directory):
-                makedirs(directory)
+            directory = os.path.dirname(new)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
 
-            rename(old, new)
+            os.rename(old, new)
 
             v = self.window.find_open_file(old)
             if v:
@@ -1031,7 +998,7 @@ class TabsExtraMoveCommand(sublime_plugin.WindowCommand):
         enabled = False
         if group >= 0 and index >= 0:
             view = get_group_view(self.window, group, index)
-            if view is not None and view.file_name() is not None and exists(view.file_name()):
+            if view is not None and view.file_name() is not None and os.path.exists(view.file_name()):
                 enabled = True
         return enabled
 
@@ -1083,7 +1050,7 @@ class TabsExtraFilePathCommand(sublime_plugin.WindowCommand):
                 view.run_command('copy_path')
                 pth = sublime.get_clipboard()
                 if path_type == 'name':
-                    pth = basename(pth)
+                    pth = os.path.basename(pth)
                 elif path_type == 'path_uri':
                     pth = urljoin('file:', pathname2url(pth))
                 sublime.set_clipboard(pth)
@@ -1165,7 +1132,7 @@ class TabsExtraSortCommand(sublime_plugin.WindowCommand):
         """Import the sort_by module."""
 
         import imp
-        path_name = join("Packages", normpath(module_name.replace('.', '/')))
+        path_name = os.path.join("Packages", os.path.normpath(module_name.replace('.', '/')))
         path_name += ".py"
         module = imp.new_module(module_name)
         sys.modules[module_name] = module
