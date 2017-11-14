@@ -3,17 +3,28 @@ site_url: https://facelessuser.github.io/TabsExtra
 repo_url: https://github.com/facelessuser/TabsExtra
 edit_uri: tree/master/docs/src/markdown
 site_description: Sublime Plugin with sticky tabs, more tab closing options, and additional menu items.
-copyright: Copyright &copy; 2014 - 2015 <a href="https://github.com/facelessuser">Isaac Muse</a>
+copyright: |
+  Copyright &copy; 2014 - 2015 <a href="https://github.com/facelessuser">Isaac Muse</a>
+  <br><span class="md-footer-custom-text">emoji provided free by </span><a href="http://www.emojione.com">EmojiOne</a>
+
+docs_dir: docs/src/markdown
+theme:
+  name: material
+  custom_dir: docs/theme
+  palette:
+    primary: blue
+    accent: blue
+  logo:
+    icon: description
+  font:
+    text: Roboto
+    code: Roboto Mono
 
 pages:
   - Installation: installation.md
   - User Guide: index.md
   - Contributing &amp; Support: contributing.md
   - License: license.md
-
-theme: material
-docs_dir: docs/src/markdown
-theme_dir: docs/theme
 
 markdown_extensions:
   - markdown.extensions.toc:
@@ -39,7 +50,8 @@ markdown_extensions:
   - pymdownx.inlinehilite:
   - pymdownx.magiclink:
       repo_url_shortener: true
-      base_repo_url: https://github.com/facelessuser/TabsExtra
+      user: facelessuser
+      repo: TabsExtra
   - pymdownx.tilde:
   - pymdownx.caret:
   - pymdownx.smartsymbols:
@@ -60,16 +72,10 @@ markdown_extensions:
   - pymdownx.details:
 
 extra:
-  palette:
-    primary: blue
-    accent: blue
-  font:
-    text: Roboto
-    code: Roboto Mono
   social:
     - type: github
       link: https://github.com/facelessuser
 extra_css:
-  - extra-9b4c72abee.css
+  - extra-00833721db.css
 extra_javascript:
-  - extra-449b50d2b3.js
+  - extra-4596f9831a.js
