@@ -1,3 +1,9 @@
+# TabsExtra 1.5.1
+
+> Released Mar X, 2018
+
+- **FIX**: Fix view index issue.
+
 # TabsExtra 1.5.0
 
 > Released Nov 13, 2017

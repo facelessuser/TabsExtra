@@ -138,7 +138,7 @@ def get_group_view(window, group, index):
     """Get the view at the given index in the given group."""
 
     sheets = window.sheets_in_group(int(group))
-    sheet = sheets[index] if index < len(sheets) else None
+    sheet = sheets[index] if -1 < index < len(sheets) else None
     view = sheet.view() if sheet is not None else None
 
     return view
