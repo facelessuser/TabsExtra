@@ -1,8 +1,9 @@
 # TabsExtra 1.5.1
 
-> Released Mar X, 2018
+> Released Mar 16, 2018
 
 - **FIX**: Fix view index issue.
+- **FIX**: Make upgrade message a little more clear about menu installation differences.
 
 # TabsExtra 1.5.0
 

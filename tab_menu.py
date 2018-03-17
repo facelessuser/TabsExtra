@@ -45,10 +45,12 @@ Menu format upgraded to version (%(format)s). To pick up these changes, do one o
 following:
 
 1. If using the override menu, select "Preferences->Package Settings->TabsExtra->Install/Upgrade Default Override Menu"
-   from Sublime's menu.
+   from Sublime's menu. Override menu ensures close options are grouped sanely in the menu.
 
 2. If using the default menu, select "Preferences->Package Settings->TabsExtra->Install/Upgrade TabsExtra Menu"
    from the menu" from Sublime's menu.
+
+You will continue seeing this menu until you take one of the actions shown above.
 
 ======================================================================================
 
