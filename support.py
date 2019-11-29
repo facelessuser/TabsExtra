@@ -5,7 +5,7 @@ import textwrap
 import webbrowser
 import re
 
-__version__ = "1.5.1"
+__version__ = "1.5.2"
 __pc_name__ = 'TabsExtra'
 
 CSS = '''
@@ -108,7 +108,7 @@ class TabsExtraOpenSiteCommand(sublime_plugin.ApplicationCommand):
     """Open site links."""
 
     def run(self, url):
-        """Open the url."""
+        """Open the URL."""
 
         webbrowser.open_new_tab(url)
 
