@@ -126,7 +126,7 @@ def timestamp_view(window, sheet):
         active_group, active_index = window.get_sheet_index(sheet)
         # Add time stamp of last activation
         view.settings().set('tabs_extra_last_activated', time.time())
-        # Track the tabs last postion to help with focusing after a tab is moved
+        # Track the tabs last position to help with focusing after a tab is moved
         view.settings().set('tabs_extra_last_activated_sheet_index', active_index)
         LAST_ACTIVE = view
         debug("activated - %s" % view.file_name())
@@ -204,7 +204,7 @@ class Focus(object):
 # Sticky Tabs
 ###############################
 class TabsExtraClearAllStickyCommand(sublime_plugin.WindowCommand):
-    """Clear all sticy tabs."""
+    """Clear all sticky tabs."""
 
     def run(self, group=-1, force=False):
         """Clear all tab sticky states of current active group."""
@@ -589,7 +589,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
         return cmd
 
     def on_load(self, view):
-        """Handle load focus or spawining."""
+        """Handle load focus or spawning."""
 
         Focus.cancel()
 
@@ -600,7 +600,7 @@ class TabsExtraListener(sublime_plugin.EventListener):
             self.on_spawn(view)
 
     def on_spawn(self, view):
-        """When a new view is spawned, postion the view per user's preference."""
+        """When a new view is spawned, position the view per user's preference."""
 
         window = view.window()
         if window and window.get_view_index(view)[1] != -1:

@@ -36,3 +36,4 @@ nosetests.xml
 
 site/*
 build/*
+.tox/*
