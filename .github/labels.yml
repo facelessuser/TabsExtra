@@ -1,0 +1,55 @@
+template: 'facelessuser:master-labels:labels.yml:master'
+
+# Wildcard labels
+
+brace_expansion: true
+extended_glob: true
+
+rules:
+  - labels: ['C: infrastructure']
+    patterns: ['*|-@(*.md|*.py|*.sublime-@(keymap|menu|settings|commands))', '.github/**']
+
+  - labels: ['C: source']
+    patterns: ['**/@(*.py|*.sublime-@(keymap|menu|settings|commands))|-tests']
+
+  - labels: ['C: docs']
+    patterns: ['**/*.md|docs/**']
+
+  - labels: ['C: tests']
+    patterns: ['tests/**']
+
+  - labels: ['C: settings']
+    patterns: ['*.sublime-@(keymap|menu|settings|commands)']
+
+  - labels: ['C: menu']
+    patterns: ['tab_menu.py']
+
+  - labels: ['C: sort']
+    patterns: ['tab_sort_helper.py|sort/**']
+
+  - labels: ['C: core']
+    patterns: ['tabs_extra.py']
+
+
+# Label management
+
+labels:
+- name: 'C: settings'
+  color: subcategory
+  description: Related to Sublime settings.
+
+- name: 'C: plugins'
+  color: subcategory
+  description: Related to plugin modules.
+
+- name: 'C: menu'
+  color: subcategory
+  description: Related to menu handling.
+
+- name: 'C: sort'
+  color: subcategory
+  description: Related to tab sorting.
+
+- name: 'C: core'
+  color: subcategory
+  description: Related to core code.
