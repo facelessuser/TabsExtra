@@ -835,7 +835,7 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
                     if sublime.ok_cancel_dialog("Delete %s?" % file_name, "Delete"):
                         if not view.close():
                             return
-                        import Default.send2trash as send2trash
+                        import Default.send2trash as send2trash  # noqa: N813
                         send2trash.send2trash(file_name)
 
     def is_visible(self, group=-1, index=-1):

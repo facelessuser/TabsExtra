@@ -4,8 +4,9 @@ repo_url: https://github.com/facelessuser/TabsExtra
 edit_uri: tree/master/docs/src/markdown
 site_description: Sublime Plugin with sticky tabs, more tab closing options, and additional menu items.
 copyright: |
-  Copyright &copy; 2014 - 2015 <a href="https://github.com/facelessuser">Isaac Muse</a>
-  <br><span class="md-footer-custom-text">emoji provided free by </span><a href="http://www.emojione.com">EmojiOne</a>
+  Copyright &copy; 2013 - 2019 <a href="https://github.com/facelessuser">Isaac Muse</a>
+  <br><span class="md-footer-custom-text">emoji provided free by </span>
+  <a href="https://github.com/twitter/twemoji">Twemoji</a>
 
 docs_dir: docs/src/markdown
 theme:
@@ -20,7 +21,7 @@ theme:
     text: Roboto
     code: Roboto Mono
 
-pages:
+nav:
   - Installation: installation.md
   - User Guide: index.md
   - Contributing &amp; Support: contributing.md
@@ -50,12 +51,14 @@ markdown_extensions:
   - pymdownx.inlinehilite:
   - pymdownx.magiclink:
       repo_url_shortener: true
+      repo_url_shorthand: true
       user: facelessuser
       repo: TabsExtra
   - pymdownx.tilde:
   - pymdownx.caret:
   - pymdownx.smartsymbols:
   - pymdownx.emoji:
+      emoji_index: !!python/name:pymdownx.emoji.twemoji
       emoji_generator: !!python/name:pymdownx.emoji.to_png
   - pymdownx.escapeall:
       hardbreak: true
@@ -63,8 +66,7 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.progressbar:
-  - pymdownx.plainhtml:
-      strip_attributes: ''
+  - pymdownx.striphtml:
   - pymdownx.snippets:
       base_path: docs/src/markdown/_snippets
   - pymdownx.keys:
@@ -76,6 +78,6 @@ extra:
     - type: github
       link: https://github.com/facelessuser
 extra_css:
-  - extra-00833721db.css
+  - extra-174a536342.css
 extra_javascript:
-  - extra-4596f9831a.js
+  - extra-0d9305e748.js
