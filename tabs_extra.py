@@ -568,7 +568,6 @@ class TabsExtraListener(sublime_plugin.EventListener):
             if extra_command_call and command_name == "close_file":
                 view.settings().set("tabs_extra_closing", True)
                 return cmd
-            command_name = "tabs_extra_close"
             group, index = window.get_view_index(view)
             args = {"group": group, "index": index}
         if command_name in ["close_by_index", "close"]:
@@ -836,7 +835,7 @@ class TabsExtraDeleteCommand(sublime_plugin.WindowCommand):
                     if sublime.ok_cancel_dialog("Delete %s?" % file_name, "Delete"):
                         if not view.close():
                             return
-                        import Default.send2trash as send2trash
+                        import Default.send2trash as send2trash  # noqa: N813
                         send2trash.send2trash(file_name)
 
     def is_visible(self, group=-1, index=-1):
