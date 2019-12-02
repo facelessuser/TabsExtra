@@ -507,40 +507,44 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
 
         TabsExtraListener.extra_command_call = True
 
-        if group >= 0 and index >= 0:
-            self.init(close_type, group, index)
+        try:
+            if group >= 0 and index >= 0:
+                self.init(close_type, group, index)
 
-            if (
-                len(self.targets) and
-                not unsaved_prompt and
-                not all(not target.view().is_dirty() for target in self.targets) and
-                not sublime.ok_cancel_dialog(
-                    "Are you sure you want to dismiss all targeted unsaved buffers?"
-                )
-            ):
-                return
+                if (
+                    len(self.targets) and
+                    not unsaved_prompt and
+                    not all(not target.view().is_dirty() for target in self.targets) and
+                    not sublime.ok_cancel_dialog(
+                        "Are you sure you want to dismiss all targeted unsaved buffers?"
+                    )
+                ):
+                    TabsExtraListener.extra_command_call = False
+                    return
 
-            for s in self.targets:
-                v = s.view()
-                if v is not None:
-                    if self.can_close(v.settings().get("tabs_extra_sticky", False), close_type == "single"):
-                        if not self.persistent:
+                for s in self.targets:
+                    v = s.view()
+                    if v is not None:
+                        if self.can_close(v.settings().get("tabs_extra_sticky", False), close_type == "single"):
+                            if not self.persistent:
+                                v.settings().erase("tabs_extra_sticky")
+                            self.window.focus_view(v)
+                            if not v.is_dirty() or close_unsaved:
+                                if not unsaved_prompt:
+                                    v.set_scratch(True)
+                                sublime_api.window_close_file(self.window.id(), v.id())
+                        elif not self.persistent:
                             v.settings().erase("tabs_extra_sticky")
-                        self.window.focus_view(v)
-                        if not v.is_dirty() or close_unsaved:
-                            if not unsaved_prompt:
-                                v.set_scratch(True)
-                            sublime_api.window_close_file(self.window.id(), v.id())
-                    elif not self.persistent:
-                        v.settings().erase("tabs_extra_sticky")
-                else:
-                    self.window.focus_sheet(s)
-                    self.window.run_command('close_file')
+                    else:
+                        self.window.focus_sheet(s)
+                        self.window.run_command('close_file')
 
-            if not self.persistent and self.cleanup:
-                self.window.run_command("tabs_extra_clear_all_sticky", {"group": group})
+                if not self.persistent and self.cleanup:
+                    self.window.run_command("tabs_extra_clear_all_sticky", {"group": group})
 
-            self.select_view()
+                self.select_view()
+        except Exception:
+            pass
 
         TabsExtraListener.extra_command_call = False
 
@@ -677,6 +681,8 @@ class TabsExtraListener(sublime_plugin.EventListener):
             if window is not None:
                 view.settings().set("tabs_extra_view_info", view.window().get_view_index(view))
                 view.settings().set("tabs_extra_window_info", view.window().id())
+            else:
+                TabsExtraListener.extra_command_call = False
 
     def on_close(self, view):
         """

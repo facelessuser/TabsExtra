@@ -5,7 +5,7 @@ import textwrap
 import webbrowser
 import re
 
-__version__ = "1.5.2"
+__version__ = "1.5.3"
 __pc_name__ = 'TabsExtra'
 
 CSS = '''

@@ -1,5 +1,9 @@
 # TabsExtra
 
+## 1.5.3
+
+- **FIX**: Fix issue where sometimes when moving, active tabs are no longer flagged with timestamps.
+
 ## 1.5.2
 
 - **FIX**: Fix issue where override commands were not always properly getting overridden.
