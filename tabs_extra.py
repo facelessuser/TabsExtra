@@ -18,6 +18,7 @@ from urllib.parse import urljoin
 from urllib.request import pathname2url
 
 SETTINGS = "tabs_extra.sublime-settings"
+PREFS = "Preferences.sublime-settings"
 
 LEFT = 0
 RIGHT = 1
@@ -77,24 +78,10 @@ def is_persistent():
 
 def sort_on_load_save():
     """Sort on save."""
-    return sublime.load_settings(SETTINGS).get("sort_on_load_save", False)
-
-
-def view_spawn_pos():
-    """Where do new views get spawned."""
-    return sublime.load_settings(SETTINGS).get("spawn_view", "none")
-
-
-def get_fallback_direction():
-    """Get the focused tab fallback direction."""
-
-    mode = LEFT
-    value = sublime.load_settings(SETTINGS).get("fallback_focus", "left")
-    if value == "last_active":
-        mode = LAST
-    elif value == "right":
-        mode = RIGHT
-    return mode
+    return (
+        sublime.load_settings(SETTINGS).get("sort_on_load_save", False) and
+        not sublime.load_settings(PREFS).get("preview_on_click")
+    )
 
 
 def timestamp_view(window, sheet):
@@ -390,18 +377,6 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
         if active_index is not None:
             self.active_index = active_index
 
-        # Compile a list of existing tabs with their timestamps
-        self.last_activated = []
-        if get_fallback_direction() == LAST:
-            for s in self.sheets:
-                v = s.view()
-                if v is not None:
-                    last_activated = v.settings().get("tabs_extra_last_activated", None)
-                    if last_activated is not None:
-                        self.last_activated.append((last_activated, s))
-                else:
-                    self.last_activated.append((0, s))
-
         # Determine targeted sheets to close and sheets to cleanup
         if close_type == "single":
             self.targets = [self.sheets[index]]
@@ -419,83 +394,12 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
             self.targets = self.sheets[:]
             self.cleanup = False
 
-    def select_left(self, fallback=True):
-        """Select tab to the left if the current active tab was closed."""
-
-        selected = False
-        for x in reversed(range(0, self.active_index)):
-            if self.window.get_sheet_index(self.sheets[x])[1] != -1:
-                Focus.defer(self.window, self.sheets[x])
-                selected = True
-                break
-        if fallback and not selected:
-            # Fallback to other direction
-            selected = self.select_left(False)
-        return selected
-
-    def select_right(self, fallback=True):
-        """Select tab to the right if the current active tab was closed."""
-
-        selected = False
-        for x in range(self.active_index + 1, len(self.sheets)):
-            if self.window.get_sheet_index(self.sheets[x])[1] != -1:
-                Focus.defer(self.window, self.sheets[x])
-                selected = True
-                break
-        if fallback and not selected:
-            # Fallback to other direction
-            selected = self.select_right(False)
-        return selected
-
-    def select_last(self, fallback=True):
-        """Select last activated tab if available."""
-
-        selected = False
-        self.last_activated = sorted(self.last_activated, key=lambda x: x[0])
-
-        if len(self.last_activated):
-            # Get most recent activated tab
-            for s in reversed(self.last_activated):
-                if self.window.get_sheet_index(s[1])[1] != -1:
-                    Focus.defer(self.window, s[1])
-                    selected = True
-                    break
-
-        if fallback and not selected:
-            # Fallback left
-            selected = self.select_left(False)
-        if fallback and not selected:
-            # Fallback right
-            selected = self.select_right(False)
-        return selected
-
-    def select_view(self):
-        """Select active tab, if available, or fallback to the left or right."""
-
-        selected = False
-        if self.active_index is not None:
-            fallback_mode = get_fallback_direction()
-            if self.window.get_sheet_index(self.sheets[self.active_index])[1] != -1:
-                self.window.focus_sheet(self.sheets[self.active_index])
-                selected = True
-            elif fallback_mode == LAST:
-                selected = self.select_last()
-            elif fallback_mode == RIGHT:
-                selected = self.select_right()
-            else:
-                selected = self.select_left()
-        return selected
-
     def can_close(self, is_sticky, is_single):
         """Prompt user in certain scenarios if okay to close."""
 
         is_okay = True
         if is_sticky:
-            if is_single:
-                is_okay = sublime.ok_cancel_dialog(
-                    "This is a sticky tab, are you sure you want to close?"
-                )
-            else:
+            if not is_single:
                 is_okay = False
         return is_okay
 
@@ -541,8 +445,6 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
 
                 if not self.persistent and self.cleanup:
                     self.window.run_command("tabs_extra_clear_all_sticky", {"group": group})
-
-                self.select_view()
         except Exception:
             pass
 
@@ -603,45 +505,6 @@ class TabsExtraListener(sublime_plugin.EventListener):
         else:
             self.on_spawn(view)
 
-    def on_spawn(self, view):
-        """When a new view is spawned, position the view per user's preference."""
-
-        window = view.window()
-        if window and window.get_view_index(view)[1] != -1:
-
-            loaded = view.settings().get("tabs_extra_spawned", False)
-            if not loaded:
-                sheet = window.active_sheet()
-                spawn = view_spawn_pos()
-                if spawn != "none":
-                    sheets = window.sheets()
-                    group, index = window.get_sheet_index(sheet)
-                    last_group = None
-                    last_index = None
-                    if LAST_ACTIVE is not None:
-                        for s in sheets:
-                            v = s.view()
-                            if v is not None and LAST_ACTIVE.id() == v.id():
-                                last_group, last_index = window.get_sheet_index(s)
-                                break
-                    active_in_range = (
-                        last_group is not None and
-                        last_index is not None and
-                        last_group == group
-                    )
-                    if spawn == "right":
-                        group, index = window.get_sheet_index(sheets[-1])
-                        window.set_sheet_index(sheet, group, index)
-                    elif spawn == "left":
-                        group, index = window.get_sheet_index(sheets[0])
-                        window.set_sheet_index(sheet, group, index)
-                    elif spawn == "active_right" and active_in_range:
-                        window.set_sheet_index(sheet, group, last_index + 1)
-                    elif spawn == "active_left" and active_in_range:
-                        window.set_sheet_index(sheet, group, last_index)
-
-                view.settings().set("tabs_extra_spawned", True)
-
     def on_post_save(self, view):
         """On save sorting."""
 
@@ -694,13 +557,6 @@ class TabsExtraListener(sublime_plugin.EventListener):
         view_info = view.settings().get("tabs_extra_view_info", None)
         window_info = view.settings().get("tabs_extra_window_info", None)
         if view_info is not None and window_info is not None:
-            window = None
-            for w in sublime.windows():
-                if w.id() == window_info:
-                    window = w
-                    break
-            if window is not None:
-                self.select_tab(window, int(view_info[0]), view_info[1])
             TabsExtraListener.extra_command_call = False
 
     def on_activated(self, view):
@@ -728,81 +584,9 @@ class TabsExtraListener(sublime_plugin.EventListener):
             active_group = window.get_view_index(view)[0]
             if window.id() != win_id or int(group_id) != int(active_group):
                 view.settings().erase("tabs_extra_moving")
-                last_index = view.settings().get('tabs_extra_last_activated_sheet_index', -1)
-                self.on_move(view, win_id, int(group_id), last_index)
         elif sort_on_load_save() and view.settings().get('tabsextra_to_sort'):
             view.settings().erase('tabsextra_to_sort')
             self.on_sort(view)
-
-    def on_move(self, view, win_id, group_id, last_index):
-        """Select the fallback tab in the group it was moved from."""
-
-        for w in sublime.windows():
-            if w.id() == win_id:
-                self.select_tab(w, group_id, last_index)
-                break
-
-    def select_tab(self, window, group_id, last_index):
-        """Select the desired fallback tab."""
-
-        selected = False
-        sheets = window.sheets_in_group(group_id)
-        fallback_mode = get_fallback_direction()
-        if len(sheets) == 0:
-            return
-        if last_index >= 0:
-            if fallback_mode == LAST:
-                selected = self.select_last(sheets, window, last_index)
-            elif fallback_mode == RIGHT:
-                selected = self.select_right(sheets, window, last_index)
-            else:
-                selected = self.select_left(sheets, window, last_index)
-        return selected
-
-    def select_last(self, sheets, window, closed_index, fallback=True):
-        """Ensure focus of last active view."""
-
-        selected = False
-        last_activated = []
-        for s in sheets:
-            v = s.view()
-            if v is not None:
-                last = v.settings().get("tabs_extra_last_activated", None)
-                if last is not None:
-                    last_activated.append((last, s))
-            else:
-                last_activated.append((0, s))
-        last_activated = sorted(last_activated, key=lambda x: x[0])
-        if len(last_activated):
-            Focus.defer(window, last_activated[-1][1])
-            selected = True
-        if not selected and fallback:
-            selected = self.select_left(sheets, window, closed_index, False)
-        if not selected and fallback:
-            selected = self.select_right(sheets, window, closed_index, False)
-        return selected
-
-    def select_right(self, sheets, window, closed_index, fallback=True):
-        """Ensure focus of view to the right of closed view."""
-
-        selected = False
-        if len(sheets) > closed_index:
-            Focus.defer(window, sheets[closed_index])
-            selected = True
-        if not selected and fallback:
-            selected = self.select_left(sheets, window, closed_index, False)
-        return selected
-
-    def select_left(self, sheets, window, closed_index, fallback=True):
-        """Ensure focus of view to the left of closed view."""
-
-        selected = False
-        if len(sheets) >= closed_index:
-            Focus.defer(window, sheets[closed_index - 1])
-            selected = True
-        if not selected and fallback:
-            selected = self.select_right(sheets, window, closed_index, False)
-        return selected
 
 
 ###############################
