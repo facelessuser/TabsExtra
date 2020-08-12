@@ -18,6 +18,8 @@ theme:
   font:
     text: Roboto
     code: Roboto Mono
+  features:
+    - tabs
 
 nav:
   - Installation: installation.md
