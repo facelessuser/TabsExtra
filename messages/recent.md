@@ -1,4 +1,4 @@
-# TabsExtra 1.5.0
+# TabsExtra 1.6.0
 
 New release!
 
