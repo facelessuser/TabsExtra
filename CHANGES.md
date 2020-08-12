@@ -7,7 +7,7 @@
 - **NEW**: `sort_on_load_save` will only apply if the Sublime setting `preview_on_click` is disabled. This is to prevent
   issues focusing when selecting files in the sidebar.
 - **NEW**: Sticky tabs will only protect a tab on bulk close. This provides consistency as we have no way to stop single
-  tabs close via tab close buttons; therefore, we won't stop a tab from closing when the use explicitly calls close
+  tabs close via tab close buttons; therefore, we won't stop a tab from closing when the user explicitly calls close
   on just that tab.
 
 ## 1.5.3
