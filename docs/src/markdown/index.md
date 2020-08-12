@@ -2,33 +2,42 @@
 
 ## Overview
 
-Sublime Plugin with sticky tabs, more tab closing options, tab sorting, and tab access to cloning, deleting, renaming etc.
+Sublime Plugin with sticky tabs, more tab closing options, tab sorting, and tab access to cloning, deleting, renaming,
+etc.
 
 ![Menu](images/Menu.png)
 
 - Adds `Close Tabs to the Left` for the current group.
 - Adds `Close All Tabs` for the current group.
-- Adds `Sticky Tabs` that allows a user to select certain tabs that will not close when a tab close command is issued.
+- Adds `Sticky Tabs` that allows a user to select certain tabs that will not close when a tab close command is issued on
+  multiple tabs.
 - Adds variants of the close commands to skip unsaved files, or to dismiss saved files with no prompt.
 - Overrides the built-in tab commands and 'close' and 'close_all' commands to work with sticky tabs.
-- Keep active window focus on delete, or default to the last active, left, or right tab (user configurable).
 - Add open last tab, reveal in sidebar or finder, copy file path, save options, and revert.
 - Adds tab sorting options (based loosely on @bizoo's [SortTabs][sorttabs] plugin).
 - Access clone, delete, rename, move, save, reveal, copy file path, revert, etc.
 
 ## General Usage
 
-Using TabsExtra is very straight forward once the menu is created.  TabsExtra will update the right click context menu of tabs with various useful features.  It also overrides a couple of Sublime's commands to allow for various improvements in relation to tab closing, tab focus when closing files, and tab position when opening files.
+Using TabsExtra is very straight forward once the menu is created.  TabsExtra will update the right click context menu
+of tabs with various useful features.  It also overrides a couple of Sublime's commands to allow for various
+improvements in relation to tab closing.
 
 ## Install/Upgrade Menu
 
-When first installing TabsExtra, you need to Install the new menu; this does not happen automatically.  Go to `Preferences->Package Settings->TabsExtra` and Install/Upgrade either the **basic** tab menu or the **override** menu. The **basic** menu's commands won't be grouped together with the built-in options because of the way Sublime Text's menus are managed.  But the **override** menu overrides the **Default** Package's tab context menu for sane, clean grouping of the commands.
+When first installing TabsExtra, you need to Install the new menu; this does not happen automatically.  Go to
+`Preferences->Package Settings->TabsExtra` and Install/Upgrade either the **basic** tab menu or the **override** menu.
+The **basic** menu's commands won't be grouped together with the built-in options because of the way Sublime Text's
+menus are managed.  But the **override** menu overrides the **Default** Package's tab context menu for sane, clean
+grouping of the commands.
 
 ## Which Commands does TabsExtra Override and Why?
 
-TabsExtra overrides all close commands that it can.  The only one it does not override is when the close button on a tab is clicked as that seems to side step the override API and cannot be intercepted.
+TabsExtra overrides all close commands that it can.  The only one it does not override is when the close button on a tab
+is clicked as that seems to side step the override API and cannot be intercepted.
 
-TabsExtra intercepts the close commands in order to provide enhanced close options. Here are all the intercepted commands:
+TabsExtra intercepts the close commands in order to provide enhanced close options. Here are all the intercepted
+commands:
 
 - `close_file`: Close called with a specific window and view id.
 - `close_by_index`: Close view from tab.
@@ -37,13 +46,15 @@ TabsExtra intercepts the close commands in order to provide enhanced close optio
 - `close_others_by_index`: Close other tabs in current group.
 - `close_to_right_by_index` Close tabs to right in current group.
 
-This allows TabsExtra do special things like ignore certain tabs, focus a specific tab after closing tab(s), force close without prompting the user if they want to save for every unsaved tab, or even skip unsaved tabs when closing.
+This allows TabsExtra do special things like ignore certain tabs, force close without prompting the user if they want to
+save for every unsaved tab, or even skip unsaved tabs when closing.
 
-TabsExtra **cannot** override the tab close button.  But it should be able to predict when it is pressed, and focus the appropriate window after the close.
+TabsExtra **cannot** override the tab close button.
 
 ## New Close Options
 
-TabsExtra expands how many close options there are in the tab context menu.  It also makes them available in the quick panel as well.
+TabsExtra expands how many close options there are in the tab context menu.  It also makes them available in the quick
+panel as well.
 
 - Close.
 - Close other tabs.
@@ -51,14 +62,19 @@ TabsExtra expands how many close options there are in the tab context menu.  It 
 - Close tabs to right.
 - Close all tabs.
 
-And TabsExtra also provides variants that will force close unsaved tabs without annoying the user with a prompt for every unsaved tab.  It also provides variants to simply skip unsaved tabs.
+And TabsExtra also provides variants that will force close unsaved tabs without annoying the user with a prompt for
+every unsaved tab.  It also provides variants to simply skip unsaved tabs.
 
 ## Sticky Tabs
 
-TabsExtra allows users to mark a tab *sticky*.  This allows the tab to not close when a `close` operation is performed.  By default, after any `close` command is run, the *sticky* tab properties are forgotten.  You can make a tab's stickiness persist by enabling [persistent_sticky](#persistent_sticky).
+TabsExtra allows users to mark a tab *sticky*.  This allows the tab to not close when a `close` operation is performed
+via a bulk close command. By default, after any bulk `close` command is run, the *sticky* tab properties are forgotten.
+You can make a tab's stickiness persist by enabling [persistent_sticky](#persistent_sticky).
 
 !!! warning "Warning"
-    TabsExtra overrides all close commands except when the user clicks the close button on a tab as this seems to be impossible to override. If this is problematic, you can disable the tab close button by disabling `show_tab_close_buttons` in your `Preferences.sublime-settings` file to prevent accidental clicking.
+    TabsExtra overrides all close commands except when the user clicks the close button on a tab as this seems to be
+    impossible to override. If this is problematic, you can disable the tab close button by disabling
+    `show_tab_close_buttons` in your `Preferences.sublime-settings` file to prevent accidental clicking.
 
 ```js
     // By default TabsExtra forgets a tab's "stickiness" when
@@ -68,24 +84,6 @@ TabsExtra allows users to mark a tab *sticky*.  This allows the tab to not close
 ```
 
 A tab's stickiness can be controlled either the context menu or the quick panel.
-
-## Tab Focus After Close
-
-By default TabsExtra keeps the current active tab focused, but if the active tab gets deleted, TabsExtra will default to either the left, right, or last active tab (depending how the user has it set).
-
-```javascript
-    // If active window gets closed, default to (left|right|last_active)
-    "fallback_focus": "right"
-```
-
-## Tab Spawn Position
-
-TabsExtra can control where a new window is opened with the `spawn_view` settings option.
-
-```js
-    // Experimental: When opening a view, where should it be spawned at (none|left|active_left|active_right|right)
-    "spawn_view": "none",
-```
 
 ## Tab Sort
 
@@ -101,7 +99,8 @@ TabsExtra adds various sort options to the tab context menu and quick panel.
 - Sort by syntax.
 - Sort current order in reverse.
 
-You can control how numbers are handled in strings by enabling `numeric_sort`.  Numbers in strings are sorted alphabetically by default, but you can cause the strings to be sorted numerically if needed.
+You can control how numbers are handled in strings by enabling `numeric_sort`.  Numbers in strings are sorted
+alphabetically by default, but you can cause the strings to be sorted numerically if needed.
 
 ```js
     // When sorting, normal strings will be sorted numerically.
@@ -114,7 +113,9 @@ You can control how numbers are handled in strings by enabling `numeric_sort`.  
     "numeric_sort": false,
 ```
 
-You can also sort tabs on every file open and save by enabling `sort_on_load_save` and specifying your desired sort plugin.
+You can also sort tabs on every file open and save by enabling `sort_on_load_save` and specifying your desired sort
+plugin. This will on work if Sublime's `preview_on_click` is set to `false`. If this was allowed to work with
+`preview_on_click`, it would cause previews to fight with moving views.
 
 ```js
     // Sort tabs when a file is opened or saved
@@ -128,9 +129,13 @@ You can also sort tabs on every file open and save by enabling `sort_on_load_sav
     "sort_on_load_save_command": {"module": "TabsExtra.sort.name"}
 ```
 
+!!! new "Changed 1.6"
+    `sort_on_load_save` will only apply when `preview_on_click` is `false`.
+
 ### Customizing Sort Options
 
-You can control which sort options appear by adding or removing entries from the `sort_layout`.  You can also change their orders as `sort_layout` is a list that preserves order.  Each entry contains three keys:
+You can control which sort options appear by adding or removing entries from the `sort_layout`.  You can also change
+their orders as `sort_layout` is a list that preserves order.  Each entry contains three keys:
 
 Key       | Required | Description
 --------- | -------- | -----------
@@ -162,9 +167,13 @@ Within a sort module, there must be a run method as shown below:
 
 `#!py3 def run(views, view_data)`
 : 
-    This function takes a list of `views` and an empty list to append sort data to.  The `view_data` is populated by the `run` function with arrays of formatted info that will be used to sort the tabs.  Info with the most importance should be appended first.
+    This function takes a list of `views` and an empty list to append sort data to.  The `view_data` is populated by the
+    `run` function with arrays of formatted info that will be used to sort the tabs.  Info with the most importance
+    should be appended first.
 
-    If you are dealing with strings that have numbers, and you wish to sort them numerically, you can import the numeric helper with the following import: `#!python from TabsExtra import tab_sort_helper as tsh`.  Once imported you can simply run your data through `tab_sort_helper`: `#!python tsh.numeric_sort(dirname(v.file_name() if v.file_name() else '')`.
+    If you are dealing with strings that have numbers, and you wish to sort them numerically, you can import the numeric
+    helper with the following import: `#!python from TabsExtra import tab_sort_helper as tsh`.  Once imported you can
+    simply run your data through `tab_sort_helper`: `#!python tsh.numeric_sort(dirname(v.file_name() if v.file_name() else '')`.
 
     **Parameters**:
 
@@ -193,7 +202,9 @@ Within a sort module, there must be a run method as shown below:
 
 ## Additional Menu Helper Commands
 
-TabsExtra also adds a number of other miscellaneous useful commands in the tab context menu.  Many of which are already available in the quick panel.  You can control which ones show up in menu by configuring `menu_layout` in the settings file; you can even control the order.
+TabsExtra also adds a number of other miscellaneous useful commands in the tab context menu.  Many of which are already
+available in the quick panel.  You can control which ones show up in menu by configuring `menu_layout` in the settings
+file; you can even control the order.
 
 ```js
     // Menu layout include or exclude, in whatever order you desire, the following options:
