@@ -1,5 +1,9 @@
 # TabsExtra
 
+## 1.6.1
+
+- **NEW**: Regression due to reference to now retired function.
+
 ## 1.6.0
 
 - **NEW**: Features for `fallback_focus` and `spawn_view` have been removed. These features were problematic and often

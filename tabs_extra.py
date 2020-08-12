@@ -495,15 +495,13 @@ class TabsExtraListener(sublime_plugin.EventListener):
         return cmd
 
     def on_load(self, view):
-        """Handle load focus or spawning."""
+        """Mange sorting."""
 
         Focus.cancel()
 
         if sort_on_load_save():
             if not self.on_sort(view):
                 view.settings().set('tabsextra_to_sort', True)
-        else:
-            self.on_spawn(view)
 
     def on_post_save(self, view):
         """On save sorting."""
