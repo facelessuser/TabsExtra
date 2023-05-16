@@ -375,7 +375,8 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
 
         self.persistent = is_persistent()
         self.sheets = self.window.sheets_in_group(int(group))
-        assert(close_type in ["single", "left", "right", "other", "all"])
+        if close_type not in ["single", "left", "right", "other", "all"]:
+            raise ValueError("Unrecognized close type of '{}'".format(close_type))
 
         # Setup active index and group
         active_sheet = self.window.active_sheet()
