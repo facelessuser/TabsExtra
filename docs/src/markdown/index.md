@@ -213,5 +213,3 @@ file; you can even control the order.
     // the default TabsMenu or the Override Menu which overrides the "Default" package's menu.
     "menu_layout": ["close", "sticky", "open", "clone", "save", "delete", "rename", "reveal", "path", "revert", "sort"],
 ```
-
---8<-- "refs.md"

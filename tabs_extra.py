@@ -17,6 +17,12 @@ import sublime_api
 from urllib.parse import urljoin
 from urllib.request import pathname2url
 
+ST_VERSION = int(sublime.version())
+# Change to `window_close_file` API
+ST_4114 = ST_VERSION >= 4114
+# Add `sheet_close` API
+ST_4088 = ST_VERSION >= 4088
+
 SETTINGS = "tabs_extra.sublime-settings"
 PREFS = "Preferences.sublime-settings"
 
@@ -82,6 +88,12 @@ def sort_on_load_save():
         sublime.load_settings(SETTINGS).get("sort_on_load_save", False) and
         not sublime.load_settings(PREFS).get("preview_on_click")
     )
+
+
+def close_callback_noop(did_close):
+    """Callback for Sublime close API."""
+
+    return None
 
 
 def timestamp_view(window, sheet):
@@ -363,7 +375,8 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
 
         self.persistent = is_persistent()
         self.sheets = self.window.sheets_in_group(int(group))
-        assert(close_type in ["single", "left", "right", "other", "all"])
+        if close_type not in ["single", "left", "right", "other", "all"]:
+            raise ValueError("Unrecognized close type of '{}'".format(close_type))
 
         # Setup active index and group
         active_sheet = self.window.active_sheet()
@@ -436,12 +449,21 @@ class TabsExtraCloseCommand(sublime_plugin.WindowCommand):
                             if not v.is_dirty() or close_unsaved:
                                 if not unsaved_prompt:
                                     v.set_scratch(True)
-                                sublime_api.window_close_file(self.window.id(), v.id())
+                                if ST_4114:
+                                    sublime_api.window_close_file(self.window.id(), v.id(), close_callback_noop)
+                                else:
+                                    sublime_api.window_close_file(self.window.id(), v.id())
                         elif not self.persistent:
                             v.settings().erase("tabs_extra_sticky")
                     else:
-                        self.window.focus_sheet(s)
-                        self.window.run_command('close_file')
+                        if ST_4088:
+                            if ST_4114:
+                                sublime_api.sheet_close(s.id(), close_callback_noop)
+                            else:
+                                sublime_api.sheet_close(s.id())
+                        else:
+                            self.window.focus_sheet(s)
+                            self.window.run_command('close_file')
 
                 if not self.persistent and self.cleanup:
                     self.window.run_command("tabs_extra_clear_all_sticky", {"group": group})

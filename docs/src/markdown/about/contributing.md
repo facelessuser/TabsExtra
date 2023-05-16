@@ -16,13 +16,10 @@ Contribution from the community is encouraged and can be done in a variety of wa
 ## Become a Sponsor :octicons-heart-fill-16:{: .heart-throb}
 
 Open source projects take time and money. Help support the project by becoming a sponsor. You can add your support at
-any tier you feel comfortable with. No amount is too little.
+any tier you feel comfortable with. No amount is too little. We also accept one time contributions via PayPal.
 
-:octicons-mark-github-16: [GitHub Sponsors ](https://github.com/sponsors/facelessuser)
-
-If you'd like to do a one time contribution, you can do so via PayPal.
-
-:fontawesome-brands-paypal: [PayPal](https://www.paypal.me/facelessuser)
+[:octicons-mark-github-16: GitHub Sponsors](https://github.com/sponsors/facelessuser){: .md-button .md-button--primary }
+[:fontawesome-brands-paypal: PayPal](https://www.paypal.me/facelessuser){ .md-button}
 
 ## Bug Reports
 
@@ -123,5 +120,3 @@ You don't have to render the docs locally before pull requesting, but if you wis
 [MkDocs][mkdocs], the [Material theme][mkdocs-material], and [PyMdown Extensions][pymdown-extensions] to render the
 docs.  You can preview the docs if you install these two packages.  The command for previewing the docs is
 `mkdocs serve` from the root directory. You can then view the documents at `localhost:8000`.
-
---8<-- "refs.md"
