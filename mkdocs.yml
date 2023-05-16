@@ -4,22 +4,35 @@ repo_url: https://github.com/facelessuser/TabsExtra
 edit_uri: tree/master/docs/src/markdown
 site_description: Sublime Plugin with sticky tabs, more tab closing options, and additional menu items.
 copyright: |
-  Copyright &copy; 2014 - 2020 <a href="https://github.com/facelessuser"  target="_blank" rel="noopener">Isaac Muse</a>
+  Copyright &copy; 2014 - 2023 <a href="https://github.com/facelessuser" target="_blank" rel="noopener">Isaac Muse</a>
 
 docs_dir: docs/src/markdown
 theme:
-  name: material
   custom_dir: docs/theme
-  palette:
-    primary: drac-purple
-    accent: drac-purple
+  name: material
   icon:
     logo: material/book-open-page-variant
+  palette:
+    scheme: dracula
+    primary: deep purple
+    accent: deep purple
   font:
     text: Roboto
     code: Roboto Mono
   features:
-    - tabs
+    - navigation.tabs
+    - navigation.top
+    - navigation.instant
+    - navigation.sections
+    - navigation.indexes
+    - toc.follow
+    - content.code.copy
+    - navigation.footer
+    - search.share
+    - search.highlight
+    - search.suggest
+  pymdownx:
+    sponsor: "https://github.com/sponsors/facelessuser"
 
 nav:
   - Installation: installation.md
@@ -84,7 +97,9 @@ extra:
 
 plugins:
   - search
-  - git-revision-date-localized
+  - git-revision-date-localized:
+      fallback_to_build_date: true
+      strict: false
   - mkdocs_pymdownx_material_extras
   - minify:
       minify_html: true
