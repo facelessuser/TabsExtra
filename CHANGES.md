@@ -1,8 +1,12 @@
 # TabsExtra
 
+## 1.6.2
+
+- **FIX**: Fix some tab closing related issues due to changes in Sublime's API.
+
 ## 1.6.1
 
-- **NEW**: Regression due to reference to now retired function.
+- **FIX**: Regression due to reference to now retired function.
 
 ## 1.6.0
 
