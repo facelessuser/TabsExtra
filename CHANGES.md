@@ -1,5 +1,9 @@
 # TabsExtra
 
+## 1.6.3
+
+-  **FIX**: Fix `copy_path` usage in Sublime 4170+ builds. This affected path to clipboard commands.
+
 ## 1.6.2
 
 - **FIX**: Fix some tab closing related issues due to changes in Sublime's API.
