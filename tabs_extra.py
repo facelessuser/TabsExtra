@@ -22,6 +22,8 @@ ST_VERSION = int(sublime.version())
 ST_4114 = ST_VERSION >= 4114
 # Add `sheet_close` API
 ST_4088 = ST_VERSION >= 4088
+# `copy_path` changed from a Text command to a Window command
+ST_4170 = ST_VERSION >= 4170
 
 SETTINGS = "tabs_extra.sublime-settings"
 PREFS = "Preferences.sublime-settings"
@@ -856,7 +858,10 @@ class TabsExtraFilePathCommand(sublime_plugin.WindowCommand):
             view = get_group_view(self.window, group, index)
             if view is not None:
                 self.window.focus_view(view)
-                view.run_command('copy_path')
+                if ST_4170:
+                    self.window.run_command('copy_path')
+                else:
+                    view.run_command('copy_path')
                 pth = sublime.get_clipboard()
                 if path_type == 'name':
                     pth = os.path.basename(pth)
