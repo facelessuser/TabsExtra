@@ -30,8 +30,6 @@ TabsExtra is released under the MIT license.
 
 [github-ci-image]: https://github.com/facelessuser/TabsExtra/workflows/build/badge.svg?branch=master&event=push
 [github-ci-link]: https://github.com/facelessuser/TabsExtra/actions?query=workflow%3Abuild+branch%3Amaster
-[discord-image]: https://img.shields.io/discord/678289859768745989?logo=discord&logoColor=aaaaaa&color=mediumpurple&labelColor=333333
-[discord-link]: https://discord.gg/TWs8Tgr
 [pc-image]: https://img.shields.io/packagecontrol/dt/TabsExtra.svg?labelColor=333333&logo=sublime%20text
 [pc-link]: https://packagecontrol.io/packages/TabsExtra
 [license-image]: https://img.shields.io/badge/license-MIT-blue.svg?labelColor=333333
