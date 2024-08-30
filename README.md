@@ -1,5 +1,4 @@
 [![Donate via PayPal][donate-image]][donate-link]
-[![Discord][discord-image]][discord-link]
 [![Build][github-ci-image]][github-ci-link]
 [![Package Control Downloads][pc-image]][pc-link]
 ![License][license-image]

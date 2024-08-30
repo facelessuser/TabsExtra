@@ -7,15 +7,15 @@ etc.
 
 ![Menu](images/Menu.png)
 
-- Adds `Close Tabs to the Left` for the current group.
-- Adds `Close All Tabs` for the current group.
-- Adds `Sticky Tabs` that allows a user to select certain tabs that will not close when a tab close command is issued on
-  multiple tabs.
-- Adds variants of the close commands to skip unsaved files, or to dismiss saved files with no prompt.
-- Overrides the built-in tab commands and 'close' and 'close_all' commands to work with sticky tabs.
-- Add open last tab, reveal in sidebar or finder, copy file path, save options, and revert.
-- Adds tab sorting options (based loosely on @bizoo's [SortTabs][sorttabs] plugin).
-- Access clone, delete, rename, move, save, reveal, copy file path, revert, etc.
+-   Adds `Close Tabs to the Left` for the current group.
+-   Adds `Close All Tabs` for the current group.
+-   Adds `Sticky Tabs` that allows a user to select certain tabs that will not close when a tab close command is issued on
+    multiple tabs.
+-   Adds variants of the close commands to skip unsaved files, or to dismiss saved files with no prompt.
+-   Overrides the built-in tab commands and 'close' and 'close_all' commands to work with sticky tabs.
+-   Add open last tab, reveal in sidebar or finder, copy file path, save options, and revert.
+-   Adds tab sorting options (based loosely on @bizoo's [SortTabs][sorttabs] plugin).
+-   Access clone, delete, rename, move, save, reveal, copy file path, revert, etc.
 
 ## General Usage
 
@@ -39,12 +39,12 @@ is clicked as that seems to side step the override API and cannot be intercepted
 TabsExtra intercepts the close commands in order to provide enhanced close options. Here are all the intercepted
 commands:
 
-- `close_file`: Close called with a specific window and view id.
-- `close_by_index`: Close view from tab.
-- `close`: Close active view from global menu.
-- `close_all`: Close all tabs in all groups.
-- `close_others_by_index`: Close other tabs in current group.
-- `close_to_right_by_index` Close tabs to right in current group.
+-   `close_file`: Close called with a specific window and view id.
+-   `close_by_index`: Close view from tab.
+-   `close`: Close active view from global menu.
+-   `close_all`: Close all tabs in all groups.
+-   `close_others_by_index`: Close other tabs in current group.
+-   `close_to_right_by_index` Close tabs to right in current group.
 
 This allows TabsExtra do special things like ignore certain tabs, force close without prompting the user if they want to
 save for every unsaved tab, or even skip unsaved tabs when closing.
@@ -56,11 +56,11 @@ TabsExtra **cannot** override the tab close button.
 TabsExtra expands how many close options there are in the tab context menu.  It also makes them available in the quick
 panel as well.
 
-- Close.
-- Close other tabs.
-- Close tabs to left.
-- Close tabs to right.
-- Close all tabs.
+-   Close.
+-   Close other tabs.
+-   Close tabs to left.
+-   Close tabs to right.
+-   Close all tabs.
 
 And TabsExtra also provides variants that will force close unsaved tabs without annoying the user with a prompt for
 every unsaved tab.  It also provides variants to simply skip unsaved tabs.
@@ -71,10 +71,11 @@ TabsExtra allows users to mark a tab *sticky*.  This allows the tab to not close
 via a bulk close command. By default, after any bulk `close` command is run, the *sticky* tab properties are forgotten.
 You can make a tab's stickiness persist by enabling [persistent_sticky](#persistent_sticky).
 
-!!! warning "Warning"
-    TabsExtra overrides all close commands except when the user clicks the close button on a tab as this seems to be
-    impossible to override. If this is problematic, you can disable the tab close button by disabling
-    `show_tab_close_buttons` in your `Preferences.sublime-settings` file to prevent accidental clicking.
+/// warning
+TabsExtra overrides all close commands except when the user clicks the close button on a tab as this seems to be
+impossible to override. If this is problematic, you can disable the tab close button by disabling
+`show_tab_close_buttons` in your `Preferences.sublime-settings` file to prevent accidental clicking.
+///
 
 ```js
     // By default TabsExtra forgets a tab's "stickiness" when
@@ -89,15 +90,15 @@ A tab's stickiness can be controlled either the context menu or the quick panel.
 
 TabsExtra adds various sort options to the tab context menu and quick panel.
 
-- Sort by name.
-- Sort by path.
-- Sort by modified.
-- Sort by created.
-- Sort by file extension.
-- Sort by size.
-- Sort by last activated.
-- Sort by syntax.
-- Sort current order in reverse.
+-   Sort by name.
+-   Sort by path.
+-   Sort by modified.
+-   Sort by created.
+-   Sort by file extension.
+-   Sort by size.
+-   Sort by last activated.
+-   Sort by syntax.
+-   Sort current order in reverse.
 
 You can control how numbers are handled in strings by enabling `numeric_sort`.  Numbers in strings are sorted
 alphabetically by default, but you can cause the strings to be sorted numerically if needed.
@@ -129,8 +130,9 @@ plugin. This will on work if Sublime's `preview_on_click` is set to `false`. If 
     "sort_on_load_save_command": {"module": "TabsExtra.sort.name"}
 ```
 
-!!! new "Changed 1.6"
-    `sort_on_load_save` will only apply when `preview_on_click` is `false`.
+/// new  | Changed 1.6
+`sort_on_load_save` will only apply when `preview_on_click` is `false`.
+///
 
 ### Customizing Sort Options
 
@@ -165,9 +167,10 @@ If these modules do not suit your needs, you can write your own.
 
 Within a sort module, there must be a run method as shown below:
 
+/// define
 `#!py3 def run(views, view_data)`
-: 
-    This function takes a list of `views` and an empty list to append sort data to.  The `view_data` is populated by the
+
+-   This function takes a list of `views` and an empty list to append sort data to.  The `view_data` is populated by the
     `run` function with arrays of formatted info that will be used to sort the tabs.  Info with the most importance
     should be appended first.
 
@@ -199,6 +202,7 @@ Within a sort module, there must be a run method as shown below:
                 )
             )
     ```
+///
 
 ## Additional Menu Helper Commands
 

@@ -5,25 +5,26 @@
 The recommended way to install TabsExtra is via [Package Control][package-control].  Package Control will install the
 correct branch on your system and keep it up to date.
 
-1. Ensure Package Control is installed.  Instructions are found [here][package-control-install].
+1.  Ensure Package Control is installed.  Instructions are found [here][package-control-install].
 
-2. In Sublime Text, press ++ctrl+shift+p++ (Win, Linux) or ++cmd+shift+p++(macOS) to bring up the quick panel and start
+2.  In Sublime Text, press ++ctrl+shift+p++ (Win, Linux) or ++cmd+shift+p++(macOS) to bring up the quick panel and start
    typing `Package Control: Install Package`.  Select the command and it will show a list of installable plugins.
 
-3. Start typing `TabsExtra`; when you see it, select it.
+3.  Start typing `TabsExtra`; when you see it, select it.
 
-4. Restart to be sure everything is loaded proper.
+4.  Restart to be sure everything is loaded proper.
 
-5. Enjoy!
+5.  Enjoy!
 
 ## Manual Installation
 
-!!! warning "Warning"
-    This is not the recommended way to install TabsExtra for the average user.  Installing this way **will not** get
-    automatically updated.
+/// warning
+This is not the recommended way to install TabsExtra for the average user.  Installing this way **will not** get
+automatically updated.
 
-    If you are forking for a pull request, you should **just** clone TabsExtra and run Package Control's
-    `Satisfy Dependency` command to get all the dependencies.
+If you are forking for a pull request, you should **just** clone TabsExtra and run Package Control's
+`Satisfy Dependency` command to get all the dependencies.
+///
 
 For those who want to install TabsExtra without package control, here are the steps.  It understood that some people for
 what ever reason will prefer manually and may even have legitimate reasons to do so.  When going this route, you will
@@ -31,20 +32,20 @@ have to keep all the packages updated yourself.
 
 ---
 
-1. Download the latest releases of the following dependencies and unpack or git clone in the `Packages` folder as shown
-   below:
+1.  Download the latest releases of the following dependencies and unpack or git clone in the `Packages` folder as shown
+    below:
 
-    - https://bitbucket.org/teddy_beer_maniac/sublime-text-dependency-markupsafe -> `markupsafe`
-    - https://bitbucket.org/teddy_beer_maniac/sublime-text-dependency-jinja2 -> `python-jinja2`
-    - https://github.com/packagecontrol/pygments -> `pygments`
-    - https://github.com/facelessuser/sublime-markdown-popups -> `mdpopups`
-    - https://github.com/facelessuser/sublime-markdown -> `python-markdown`
+    -   https://bitbucket.org/teddy_beer_maniac/sublime-text-dependency-markupsafe -> `markupsafe`
+    -   https://bitbucket.org/teddy_beer_maniac/sublime-text-dependency-jinja2 -> `python-jinja2`
+    -   https://github.com/packagecontrol/pygments -> `pygments`
+    -   https://github.com/facelessuser/sublime-markdown-popups -> `mdpopups`
+    -   https://github.com/facelessuser/sublime-markdown -> `python-markdown`
 
-2. Download and unpack or git clone the latest TabsExtra release and unpack as `TabsExtra`:
+2.  Download and unpack or git clone the latest TabsExtra release and unpack as `TabsExtra`:
 
-    - https://github.com/facelessuser/TabsExtra -> TabsExtra
+    -   https://github.com/facelessuser/TabsExtra -> TabsExtra
 
-3. Create a folder under `Packages` called `00-dependencies` and under that folder create a file called
+3.  Create a folder under `Packages` called `00-dependencies` and under that folder create a file called
    `00-dependencies.py`:
 
     Copy the following code to `00-dependencies.py` (this code was taken from Package Control):
@@ -205,18 +206,18 @@ have to keep all the packages updated yourself.
     add_dependency('mdpopups')
     ```
 
-4. Restart and enjoy.
+4.  Restart and enjoy.
 
 ## Git Cloning
 
-1. Quit Sublime Text.
+1.  Quit Sublime Text.
 
-2. Open a terminal and enter the following.  For dependencies replace the URL with the appropriate URL, and the
-   appropriate folder to check it out to:
+2.  Open a terminal and enter the following.  For dependencies replace the URL with the appropriate URL, and the
+    appropriate folder to check it out to:
 
     ```
     cd /path/to/Sublime Text 3/Packages
     git clone https://github.com/facelessuser/TabsExtra.git TabsExtra
     ```
 
-3. Restart Sublime Text.
+3.  Restart Sublime Text.
