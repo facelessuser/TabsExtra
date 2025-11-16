@@ -1,8 +1,12 @@
 # TabsExtra
 
+## 1.6.4
+
+-   **FIX**: Ensure `typing` is including as a dependency for Python 3.3.
+
 ## 1.6.3
 
--  **FIX**: Fix `copy_path` usage in Sublime 4170+ builds. This affected path to clipboard commands.
+-   **FIX**: Fix `copy_path` usage in Sublime 4170+ builds. This affected path to clipboard commands.
 
 ## 1.6.2
 

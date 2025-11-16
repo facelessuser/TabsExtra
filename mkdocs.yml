@@ -4,7 +4,7 @@ repo_url: https://github.com/facelessuser/TabsExtra
 edit_uri: tree/master/docs/src/markdown
 site_description: Sublime Plugin with sticky tabs, more tab closing options, and additional menu items.
 copyright: |
-  Copyright &copy; 2014 - 2024 <a href="https://github.com/facelessuser" target="_blank" rel="noopener">Isaac Muse</a>
+  Copyright &copy; 2014 - 2025 <a href="https://github.com/facelessuser" target="_blank" rel="noopener">Isaac Muse</a>
 
 docs_dir: docs/src/markdown
 theme:
