@@ -2,7 +2,7 @@
 
 ## 1.6.4
 
--   **FIX**: Ensure `typing` is including as a dependency for Python 3.3.
+-   **FIX**: Ensure `typing` is included as a dependency for Python 3.3.
 
 ## 1.6.3
 
