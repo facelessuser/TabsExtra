@@ -741,6 +741,9 @@ class TabsExtraRenameCommand(sublime_plugin.WindowCommand):
 
         new = os.path.join(branch, leaf)
 
+        if os.path.exists(new) and not sublime.ok_cancel_dialog("Overwrite %s?" % new, "Replace"):
+            return
+
         try:
             os.rename(old, new)
 
@@ -789,6 +792,9 @@ class TabsExtraMoveCommand(sublime_plugin.WindowCommand):
 
     def on_done(self, old, new):
         """Handle the moving when user is done with the input panel."""
+
+        if os.path.exists(new) and not sublime.ok_cancel_dialog("Overwrite %s?" % new, "Replace"):
+            return
 
         try:
             directory = os.path.dirname(new)
