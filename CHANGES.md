@@ -1,5 +1,9 @@
 # TabsExtra
 
+## 1.8.0
+
+-   **NEW**: Add confirmation dialog when renaming a file and it might overwrite another file.
+
 ## 1.7.0
 
 -   **NEW**: Changes to support Python 3.13 on ST 4201+.
